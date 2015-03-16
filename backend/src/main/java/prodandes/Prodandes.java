@@ -1043,35 +1043,43 @@ public class Prodandes {
             jRespuesta.put("Respuesta", "Numero de productos no disponibles");
             return jRespuesta;
         }
-        //Verificar items
-        String query = "select * from (select * from (ITEM_MATERIA_PRIMA_ETAPA left outer join (select MATERIA, count(ID) as cuenta from MATERIA_PRIMA_ITEM group by MATERIA) on MATERIA_PRIMA = MATERIA) where NUMERO_SECUENCIA='" + num_secuencia + "') where CANTIDAD > cuenta";
+        //Verificar componentes
+        String query = "select * from (select * from (select * from ITEM_COMPONENTE_ETAPA left outer join (select COMPONENTE, count(ID) as cuenta from COMPONENTE_ITEM where COMPONENTE_ITEM.ESTADO = 'En Bodega' group by COMPONENTE) on COMPONENTE = COMPONENTE_NOMBRE) where NUMERO_SECUENCIA ="+num_secuencia+") where CANTIDAD > cuenta";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query);
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(query);
         if (rs.next()) {
 
             JSONObject jRespuesta = new JSONObject();
-            jRespuesta.put("Respuesta", "Cantidad de materia prima insuficiente");
+            jRespuesta.put("Respuesta", "Cantidad de componentes insuficientes");
             return jRespuesta;
         }
         st.close();
-
-        String query1 = "select * from (select * from (ITEM_COMPONENTE_ETAPA left outer join (select COMPONENTE, count(ID) as cuenta from COMPONENTE_ITEM group by COMPONENTE) on COMPONENTE = COMPONENTE_NOMBRE) where NUMERO_SECUENCIA='" + num_secuencia + "') where CANTIDAD > cuenta";
+        //Verificar materia
+        String query1 = "select * from (select * from (select * from ITEM_MATERIA_PRIMA_ETAPA left outer join (select MATERIA, count(ID) as cuenta from MATERIA_PRIMA_ITEM where MATERIA_PRIMA_ITEM.ESTADO = 'En Bodega' group by MATERIA) on MATERIA = MATERIA_PRIMA_NOMBRE) where NUMERO_SECUENCIA ="+num_secuencia+") where CANTIDAD > cuenta";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query1);
         Statement st1 = con.createStatement();
         ResultSet rs1 = st1.executeQuery(query1);
         if (rs1.next()) {
 
             JSONObject jRespuesta = new JSONObject();
-            jRespuesta.put("Respuesta", "Cantidad de producto insuficiente");
+            jRespuesta.put("Respuesta", "Cantidad de materia prima insuficiente");
             return jRespuesta;
         }
         st1.close();
         //Subir productos en etapas
-        String query2 = "update item set ETAPA = ETAPA+1 where ETAPA = " + num_secuencia;
+        String query2 = "update item set ETAPA = ETAPA+1 where ETAPA = " + (num_secuencia-1) + "AND ID = (select min(ID) from ITEM where ETAPA = "+(num_secuencia-1)+")";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query2);
         Statement st2 = con.createStatement();
         st2.executeQuery(query2);
         st2.close();
         //Reducir suministros MATERIA PRIMA
         String query3 = "select * from ITEM_MATERIA_PRIMA_ETAPA where NUMERO_SECUENCIA = " + num_secuencia;
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query3);
         Statement st3 = con.createStatement();
         ResultSet rs3 = st3.executeQuery(query3);
         ArrayList<String> lista1 = new ArrayList();
@@ -1087,6 +1095,8 @@ public class Prodandes {
         for (int i = 0; i < lista1.size(); i++) {
             for (int j = 0; j < lista2.get(i); j++) {
                 query4 = "DELETE FROM MATERIA_PRIMA_ITEM where ID = (select min(ID) from MATERIA_PRIMA_ITEM where MATERIA = '" + lista1.get(i) + "')";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query4);
                 st4 = con.createStatement();
                 rs4 = st4.executeQuery(query4);
                 st4.close();
@@ -1094,6 +1104,8 @@ public class Prodandes {
         }
         //Reducir suministros COMPONENTE
         query3 = "select * from ITEM_COMPONENTE_ETAPA where NUMERO_SECUENCIA = " + num_secuencia;
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query3);
         st3 = con.createStatement();
         rs3 = st3.executeQuery(query3);
         lista1 = new ArrayList();
@@ -1106,6 +1118,8 @@ public class Prodandes {
         for (int i = 0; i < lista1.size(); i++) {
             for (int j = 0; j < lista2.get(i); j++) {
                 query4 = "DELETE FROM COMPONENTE_ITEM where ID = (select min(ID) from COMPONENTE_ITEM where COMPONENTE = '" + lista1.get(i) + "')";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query4);
                 st4 = con.createStatement();
                 rs4 = st4.executeQuery(query4);
                 st4.close();
@@ -1121,43 +1135,55 @@ public class Prodandes {
     @POST
     @Path("/verificarProductosEstacionAnterior")
     public int verificarProductosEstacionAnterior(int numSecuencia) throws Exception {
-        abrirConexion();
         //Dar etapa y producto del num_secuencia
-        String query3 = "select etapa, nombre_producto from ETAPA_DE_PRODUCCION where NUMERO_SECUENCIA = " + numSecuencia;
-        Statement st3 = con.createStatement();
-        ResultSet rs3 = st3.executeQuery(query3);
-        int resp3 = 0;
-        String resp4 = "";
-        if (rs3.next()) {
-            resp3 = rs3.getInt("etapa");
-            resp4 = rs3.getString("nombre_producto");
-        }
-        int etapa = resp3;
-        int etapaAnterior = etapa - 1;
-        String producto = resp4;
-        st3.close();
-        //Dar id de la etapa anterior
-        String query4 = "select NUMERO_SECUENCIA from ETAPA_DE_PRODUCCION where ETAPA= " + etapaAnterior + " AND " + "NOMBRE_PRODUCTO ='" + producto + "'";
-        Statement st4 = con.createStatement();
-        ResultSet rs4 = st4.executeQuery(query4);
-        int resp5 = 0;
-        if (rs4.next()) {
-            resp5 = rs4.getInt("NUMERO_SECUENCIA");
-        }
-        st4.close();
-        int numSecAnterior = resp5;
+//        String query3 = "select etapa, nombre_producto from ETAPA_DE_PRODUCCION where NUMERO_SECUENCIA = " + numSecuencia;
+//        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+//        System.out.println(query3);
+//        Statement st3 = con.createStatement();
+//        ResultSet rs3 = st3.executeQuery(query3);
+//        int resp3 = 0;
+//        String resp4 = "";
+//        if (rs3.next()) {
+//            resp3 = rs3.getInt("etapa");
+//            System.out.println("etapa:");
+//            System.out.println(resp3);
+//            resp4 = rs3.getString("nombre_producto");
+//            System.out.println("nombre_producto:");
+//            System.out.println(resp4);
+//        }
+//        int etapa = resp3;
+//        int etapaAnterior = etapa - 1;
+//        String producto = resp4;
+//        st3.close();
+//        //Dar id de la etapa anterior
+//        String query4 = "select NUMERO_SECUENCIA from ETAPA_DE_PRODUCCION where ETAPA= " + etapaAnterior + " AND " + "NOMBRE_PRODUCTO ='" + producto + "'";
+//        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+//        System.out.println(query4);
+//        Statement st4 = con.createStatement();
+//        ResultSet rs4 = st4.executeQuery(query4);
+//        int resp5 = 0;
+//        if (rs4.next()) {
+//            resp5 = rs4.getInt("NUMERO_SECUENCIA");
+//            System.out.println("NUMERO_SECUENCIA:");
+//            System.out.println(resp5);
+//        }
+//        st4.close();
+//        int numSecAnterior = resp5;
         //Dar numero de items en etapa anterior
-        String query5 = "select count(*) as cuenta from ITEM where ETAPA= " + numSecAnterior;
+        String query5 = "select count(*) as cuenta from ITEM where ETAPA= " + (numSecuencia-1);
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query5);
         Statement st5 = con.createStatement();
         ResultSet rs5 = st5.executeQuery(query5);
         int resp6 = 0;
         if (rs5.next()) {
             resp6 = rs5.getInt("cuenta");
+            System.out.println("cuenta:");
+            System.out.println(resp6);
         }
         st5.close();
         //FIN
         System.out.println("Return verificarProductosEstacionAnterior: " + resp6);
-        cerrarConexion();
         return resp6;
     }
 }

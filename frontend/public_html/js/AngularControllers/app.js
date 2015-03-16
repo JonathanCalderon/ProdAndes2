@@ -343,7 +343,7 @@
                 	console.log('Form pedido '+JSON.stringify(self.ejecucionEtapa));
                     $http.post('http://localhost:8080/backend/Servicios/registrarEjecucionEtapa'
                     	, self.ejecucionEtapa).success(function(data){
-                    	alert("Respuesta se ha registrado la entrega del pedido");
+                    	alert("Respuesta "+data.Respuesta);
                         self.ejecucionEtapa={};
                     });
                 };
