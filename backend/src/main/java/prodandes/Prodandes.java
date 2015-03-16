@@ -985,7 +985,7 @@ public class Prodandes {
         System.out.println(idPedidoMateriaPrima);
         Calendar c = new GregorianCalendar();
         String fecha = c.get(GregorianCalendar.DAY_OF_MONTH) + "-"
-                + c.get(GregorianCalendar.MONTH) + "-" + c.get(GregorianCalendar.YEAR);
+                + (c.get(GregorianCalendar.MONTH)+1) + "-" + c.get(GregorianCalendar.YEAR);
         String query = "update PEDIDO_MATERIA_PRIMA set FECHA_ENTREGA = TO_DATE ('" + fecha + "','DD-MM-YYYY') WHERE ID = " + idPedidoMateriaPrima;
         System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
         System.out.println(query);
@@ -1012,7 +1012,7 @@ public class Prodandes {
         Calendar c = new GregorianCalendar();
         System.out.println("Marca 2");
         String fecha = c.get(GregorianCalendar.DAY_OF_MONTH) + "-"
-                + c.get(GregorianCalendar.MONTH) + "-" + c.get(GregorianCalendar.YEAR);
+                + (c.get(GregorianCalendar.MONTH)+1) + "-" + c.get(GregorianCalendar.YEAR);
         System.out.println("Marca 3");
         String query = "update PEDIDO_COMPONENTE set FECHA_ENTREGA = TO_DATE ('" + fecha + "','DD-MM-YYYY') WHERE ID = " + idPedidoComponente;
         System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
@@ -1044,7 +1044,7 @@ public class Prodandes {
             return jRespuesta;
         }
         //Verificar componentes
-        String query = "select * from (select * from (select * from ITEM_COMPONENTE_ETAPA left outer join (select COMPONENTE, count(ID) as cuenta from COMPONENTE_ITEM where COMPONENTE_ITEM.ESTADO = 'En Bodega' group by COMPONENTE) on COMPONENTE = COMPONENTE_NOMBRE) where NUMERO_SECUENCIA ="+num_secuencia+") where CANTIDAD > cuenta";
+        String query = "select * from (select CANTIDAD, (case when cuenta is null then 0 else cuenta end) as CUENTA from (select * from ITEM_COMPONENTE_ETAPA left outer join (select COMPONENTE, count(ID) as cuenta from COMPONENTE_ITEM where COMPONENTE_ITEM.ESTADO = 'En Bodega' group by COMPONENTE) on COMPONENTE = COMPONENTE_NOMBRE) where NUMERO_SECUENCIA ="+num_secuencia+") where CANTIDAD > cuenta";
         System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
         System.out.println(query);
         Statement st = con.createStatement();
@@ -1057,7 +1057,7 @@ public class Prodandes {
         }
         st.close();
         //Verificar materia
-        String query1 = "select * from (select * from (select * from ITEM_MATERIA_PRIMA_ETAPA left outer join (select MATERIA, count(ID) as cuenta from MATERIA_PRIMA_ITEM where MATERIA_PRIMA_ITEM.ESTADO = 'En Bodega' group by MATERIA) on MATERIA = MATERIA_PRIMA_NOMBRE) where NUMERO_SECUENCIA ="+num_secuencia+") where CANTIDAD > cuenta";
+        String query1 = "select * from (select CANTIDAD, (case when cuenta is null then 0 else cuenta end) as CUENTA from (select * from ITEM_MATERIA_PRIMA_ETAPA left outer join (select MATERIA, count(ID) as cuenta from MATERIA_PRIMA_ITEM where MATERIA_PRIMA_ITEM.ESTADO = 'En Bodega' group by MATERIA) on MATERIA = MATERIA_PRIMA_NOMBRE) where NUMERO_SECUENCIA ="+num_secuencia+") where CANTIDAD > cuenta";
         System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
         System.out.println(query1);
         Statement st1 = con.createStatement();
