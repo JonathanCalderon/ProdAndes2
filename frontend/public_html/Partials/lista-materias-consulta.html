@@ -1,0 +1,25 @@
+<h2 class="form-title">Materias encontrados</h2>
+<div class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading">Items de Materias</div>
+    <!-- Table -->
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Estado</th>
+            <th>Materia Prima</th>
+            <th>Id Pedido</th>
+            
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="materia in consultarMateriasCtrl.materias | orderBy: 'id'">
+            <td>{{materia.id}}</td>
+            <td>{{materia.ESTADO}}</td>
+            <td>{{materia.Materia}}</td>
+            <td>{{materia.ID_PEDIDO}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div> 

@@ -19,10 +19,10 @@
                 this.isSelected=function(tabParam){
                     return this.tab===tabParam;
                 };
- 			},
- 			controllerAs:'toolbar'
- 		};
- 	});
+            },
+            controllerAs:'toolbar'
+        };
+    });
 
  	prodAndes.directive('navegacion', function(){
  		return{
@@ -34,6 +34,7 @@
  			controllerAs:'navegacion'
  		};
  	});
+
 
  	prodAndes.directive('registrarPedidoForm', function(){
         return{
@@ -48,14 +49,14 @@
                 	console.log('Form pedido '+JSON.stringify(self.pedido));
                     $http.post('http://localhost:8080/backend/ServiciosMock/registrarPedido'
                     	, self.pedido).success(function(data){
-                    	alert("Respuesta "+data.Respuesta);
-                        self.pedido={};
-                    });
-                };
-            }],
-            controllerAs:'registrarPedidoCtrl'
-        };
-    });
+                         alert("Respuesta "+data.Respuesta);
+                         self.pedido={};
+                     });
+                    };
+                }],
+                controllerAs:'registrarPedidoCtrl'
+            };
+        });
 
     prodAndes.directive('registrarEntregaPedidoForm', function(){
         return{
@@ -70,14 +71,199 @@
                 	console.log('Form pedido '+JSON.stringify(self.pedido));
                     $http.post('http://localhost:8080/backend/ServiciosMock/registrarEntregaPedidoProductosCliente'
                     	, self.pedido).success(function(data){
-                    	alert("Respuesta se ha registrado la entrega del pedido");
-                        self.pedido={};
-                    });
+                         alert("Respuesta se ha registrado la entrega del pedido");
+                         self.pedido={};
+                     });
+                    };
+                }],
+                controllerAs:'registrarEntregaPedidoCtrl'
+            };
+        });
+
+    prodAndes.directive('toolbarConsultaProducto', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/toolbar-consulta-producto.html',
+            controller:function(){
+                this.tab=0;
+                this.selectTab=function(setTab){
+                    this.tab=setTab;
                 };
-            }],
-            controllerAs:'registrarEntregaPedidoCtrl'
+                this.isSelected=function(tabParam){
+                    return this.tab===tabParam;
+                };
+            },
+            controllerAs:'toolbarConsultaProductoCtrl'
         };
     });
 
- })();
+    prodAndes.directive('toolbarConsultaSuministros', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/toolbar-consulta-suministros.html',
+            controller:function(){
+                this.tab=0;
+                this.selectTab=function(setTab){
+                    this.tab=setTab;
+                };
+                this.isSelected=function(tabParam){
+                    return this.tab===tabParam;
+                };
+            },
+            controllerAs:'toolbarConsultaSuministrosCtrl'
+        };
+    });
+
+    prodAndes.directive('consultarProductosForm', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/consultar-productos-form.html',
+            controller: ['$http',function($http){
+                var self = this;
+
+
+                self.consulta = {};
+                self.productos = [];
+
+                this.isFull=function(){
+                    return self.productos.length>0;
+                };
+
+
+                this.enviarConsulta=function(consultaParam,criterio){
+
+                    self.productos = [];
+
+                    console.log("Criterio "+criterio)
+                    self.consulta = consultaParam,
+                    self.consulta.Criterio = criterio;
+                    console.log('Form consulta '+JSON.stringify(self.consulta));
+                    $http.post('http://localhost:8080/backend/ServiciosMock/consultarProductos' , self.consulta).success(function(data){
+
+                        console.log("Consultar productos "+JSON.stringify(data));
+                        self.productos=data;
+                        console.log("Consultar productos 2"+JSON.stringify(self.productos));
+                        self.consulta={};
+                    });
+
+
+                };
+            }],
+            controllerAs:'consultarProductosCtrl'
+        };
+    });
+
+    prodAndes.directive('listaProductosConsulta', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/lista-productos-consulta.html',
+            controller:function(){
+
+            },
+            controllerAs:'listaProductosConsulta'
+        };
+    });
+
+
+    prodAndes.directive('consultarMateriasForm', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/consultar-materias-form.html',
+            controller: ['$http',function($http){
+                var self = this;
+
+
+                self.consulta = {};
+                self.materias = [];
+
+                this.isFull=function(){
+                    return self.materias.length>0;
+                };
+
+
+                this.enviarConsulta=function(consultaParam,criterio){
+
+                    self.materias = [];
+
+                    console.log("Criterio "+criterio)
+                    self.consulta = consultaParam,
+                    self.consulta.Criterio = criterio;
+                    console.log('Form consulta '+JSON.stringify(self.consulta));
+                    $http.post('http://localhost:8080/backend/ServiciosMock/consultarMateriasPrimas', self.consulta).success(function(data){
+
+                        console.log("Consultar materias "+JSON.stringify(data));
+                        self.materias=data;
+                        console.log("Consultar materias 2"+JSON.stringify(self.materias));
+                        self.consulta={};
+                    });
+
+
+                };
+            }],
+            controllerAs:'consultarMateriasCtrl'
+        };
+    });
+
+    prodAndes.directive('listaMateriasConsulta', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/lista-materias-consulta.html',
+            controller:function(){
+
+            },
+            controllerAs:'listaMateriasConsulta'
+        };
+    });
+
+    prodAndes.directive('consultarComponentesForm', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/consultar-componentes-form.html',
+            controller: ['$http',function($http){
+                var self = this;
+
+
+                self.consulta = {};
+                self.componentes = [];
+
+                this.isFull=function(){
+                    return self.componentes.length>0;
+                };
+
+
+                this.enviarConsulta=function(consultaParam,criterio){
+
+                    self.componentes = [];
+
+                    console.log("Criterio "+criterio)
+                    self.consulta = consultaParam,
+                    self.consulta.Criterio = criterio;
+                    console.log('Form consulta '+JSON.stringify(self.consulta));
+                    $http.post('http://localhost:8080/backend/ServiciosMock/consultarComponentes', self.consulta).success(function(data){
+
+                        console.log("Consultar Componentes "+JSON.stringify(data));
+                        self.componentes=data;
+                        console.log("Consultar Componentes 2"+JSON.stringify(self.componentes));
+                        self.consulta={};
+                    });
+
+
+                };
+            }],
+            controllerAs:'consultarComponentesCtrl'
+        };
+    });
+
+    prodAndes.directive('listaComponentesConsulta', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/lista-componentes-consulta.html',
+            controller:function(){
+
+            },
+            controllerAs:'listaComponentesConsulta'
+        };
+    });
+
+})();
 

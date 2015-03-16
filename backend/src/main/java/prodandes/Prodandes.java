@@ -277,18 +277,17 @@ public class Prodandes {
 
     @POST
     @Path("/consultarProductos")
-    public JSONArray consultarProductos(List lista) throws Exception {
+    public JSONArray consultarProductos(JSONObject jP) throws Exception {
 
         JSONArray jArray = new JSONArray();
         abrirConexion();
-        LinkedHashMap lCriterio = (LinkedHashMap) lista.get(0);
-        String criterio = lCriterio.get("Criterio").toString();
+        
+        String criterio = jP.get("Criterio").toString();
         if (criterio.equalsIgnoreCase("Rango")) {
 
-            LinkedHashMap lRango1 = (LinkedHashMap) lista.get(1);
-            LinkedHashMap lRango2 = (LinkedHashMap) lista.get(2);
-            int rango1 = (int) lRango1.get("Rango1");
-            int rango2 = (int) lRango2.get("Rango2");
+            
+            int rango1 = (int) jP.get("Rango1");
+            int rango2 = (int) jP.get("Rango2");
 
             String sql = "Select * from (Select Producto.Nombre as nombreProducto,count(*) as cantidadInventario "
                     + "from (Item inner join Producto on "
@@ -322,8 +321,8 @@ public class Prodandes {
             st.close();
         } else if (criterio.equalsIgnoreCase("Etapa")) {
 
-            LinkedHashMap lEtapa = (LinkedHashMap) lista.get(1);
-            int num_etapa = (int) lEtapa.get("Etapa");
+            
+            int num_etapa = (int) jP.get("Etapa");
 
             String sql = "select * from Item where etapa=" + num_etapa;
             Statement st2 = con.createStatement();
@@ -344,8 +343,8 @@ public class Prodandes {
 
         } else if (criterio.equalsIgnoreCase("Fecha solicitud")) {
 
-            LinkedHashMap lFechaSolicitud = (LinkedHashMap) lista.get(1);
-            String fechaS = lFechaSolicitud.get("fecha_solicitud").toString();
+            
+            String fechaS = jP.get("fecha_solicitud").toString();
 
             String sql = "select * from PEDIDO_PRODUCTO where fecha_solicitud = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
@@ -374,8 +373,8 @@ public class Prodandes {
             st.close();
         } else if (criterio.equalsIgnoreCase("Fecha entrega")) {
 
-            LinkedHashMap lFechaSolicitud = (LinkedHashMap) lista.get(1);
-            String fechaS = lFechaSolicitud.get("fecha_entrega").toString();
+            
+            String fechaS = jP.get("fecha_entrega").toString();
 
             String sql = "select * from PEDIDO_PRODUCTO where fecha_entrega = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
@@ -409,18 +408,17 @@ public class Prodandes {
 
     @POST
     @Path("/consultarMateriasPrimas")
-    public JSONArray consultarMateriasPrimas(List lista) throws Exception {
+    public JSONArray consultarMateriasPrimas(JSONObject jP) throws Exception {
 
         JSONArray jArray = new JSONArray();
         abrirConexion();
-        LinkedHashMap lCriterio = (LinkedHashMap) lista.get(0);
-        String criterio = lCriterio.toString();
-        if (criterio.equalsIgnoreCase("Rango existencias inventario")) {
+        
+        String criterio = jP.toString();
+        if (criterio.equalsIgnoreCase("Rango")) {
 
-            LinkedHashMap lRango1 = (LinkedHashMap) lista.get(1);
-            LinkedHashMap lRango2 = (LinkedHashMap) lista.get(2);
-            int rango1 = (int) lRango1.get("rango 1");
-            int rango2 = (int) lRango2.get("rango 2");
+            
+            int rango1 = (int) jP.get("rango 1");
+            int rango2 = (int) jP.get("rango 2");
 
             String sql = "Select * from (Select Materia_Prima.Nombre as nombreMateria,count(*) as "
                     + "cantidadInventario "
@@ -454,10 +452,10 @@ public class Prodandes {
                 st2.close();
             }
             st.close();
-        } else if (criterio.equalsIgnoreCase("fecha_solicitud")) {
+        } else if (criterio.equalsIgnoreCase("Fecha solicitud")) {
 
-            LinkedHashMap lFechaSolicitud = (LinkedHashMap) lista.get(1);
-            String fechaS = lFechaSolicitud.get("fecha_solicitud").toString();
+            
+            String fechaS = jP.get("fecha_solicitud").toString();
 
             String sql = "select * from PEDIDO_MATERIA_PRIMA where fecha_pedido = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
@@ -485,8 +483,8 @@ public class Prodandes {
             st.close();
         } else if (criterio.equalsIgnoreCase("Fecha entrega")) {
 
-            LinkedHashMap lFechaSolicitud = (LinkedHashMap) lista.get(1);
-            String fechaS = lFechaSolicitud.get("fecha_entrega").toString();
+            
+            String fechaS = jP.get("fecha_entrega").toString();
 
             String sql = "select * from PEDIDO_MATERIA_PRIMA where fecha_entrega = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
@@ -513,8 +511,8 @@ public class Prodandes {
 
             st.close();
         } else if (criterio.equalsIgnoreCase("Tipo_material")) {
-            LinkedHashMap lTipo = (LinkedHashMap) lista.get(1);
-            String tipo = lTipo.get("Tipo_material").toString();
+           
+            String tipo = jP.get("Tipo_material").toString();
 
             String sql = "select * from MATERIA_PRIMA where TIPO = '" + tipo + "'";
             Statement st = con.createStatement();
@@ -544,18 +542,17 @@ public class Prodandes {
 
     @POST
     @Path("/consultarComponentes")
-    public JSONArray consultarComponentes(List lista) throws Exception {
+    public JSONArray consultarComponentes(JSONObject jP) throws Exception {
 
         JSONArray jArray = new JSONArray();
         abrirConexion();
-        LinkedHashMap lCriterio = (LinkedHashMap) lista.get(0);
-        String criterio = lCriterio.toString();
-        if (criterio.equalsIgnoreCase("Rango existencias inventario")) {
+        
+        String criterio = jP.toString();
+        if (criterio.equalsIgnoreCase("Rango")) {
 
-            LinkedHashMap lRango1 = (LinkedHashMap) lista.get(1);
-            LinkedHashMap lRango2 = (LinkedHashMap) lista.get(2);
-            int rango1 = (int) lRango1.get("rango 1");
-            int rango2 = (int) lRango2.get("rango 2");
+            
+            int rango1 = (int) jP.get("rango 1");
+            int rango2 = (int) jP.get("rango 2");
 
             String sql = "Select * from (Select Componente.Nombre as nombreComponente,count(*) as "
                     + "cantidadInventario "
@@ -589,10 +586,10 @@ public class Prodandes {
                 st2.close();
             }
             st.close();
-        } else if (criterio.equalsIgnoreCase("fecha_solicitud")) {
+        } else if (criterio.equalsIgnoreCase("Fecha solicitud")) {
 
-            LinkedHashMap lFechaSolicitud = (LinkedHashMap) lista.get(1);
-            String fechaS = lFechaSolicitud.get("fecha_solicitud").toString();
+            
+            String fechaS = jP.get("fecha_solicitud").toString();
 
             String sql = "select * from PEDIDO_COMPONENTE where fecha_pedido = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
@@ -620,8 +617,8 @@ public class Prodandes {
             st.close();
         } else if (criterio.equalsIgnoreCase("Fecha entrega")) {
 
-            LinkedHashMap lFechaSolicitud = (LinkedHashMap) lista.get(1);
-            String fechaS = lFechaSolicitud.get("fecha_entrega").toString();
+            
+            String fechaS = jP.get("fecha_entrega").toString();
 
             String sql = "select * from PEDIDO_componente where fecha_entrega = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
@@ -648,8 +645,8 @@ public class Prodandes {
 
             st.close();
         } else if (criterio.equalsIgnoreCase("Tipo_material")) {
-            LinkedHashMap lTipo = (LinkedHashMap) lista.get(1);
-            String tipo = lTipo.get("Tipo_material").toString();
+            
+            String tipo = jP.get("Tipo_material").toString();
 
             String sql = "select * from componente where TIPO = '" + tipo + "'";
             Statement st = con.createStatement();

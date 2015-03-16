@@ -21,17 +21,26 @@ and open the template in the editor.
             <navegacion></navegacion> 
         </div>
         
-        <div ng-if="toolbar.isSelected(1)">
-            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-                <registrar-pedido-form registarPedidoForm></registrar-pedido-form>
-
-            </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2" ng-if="toolbar.isSelected(1)">            
+            <registrar-pedido-form registarPedidoForm></registrar-pedido-form>            
         </div>
         
         <div ng-if="toolbar.isSelected(2)">
             <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
                 <registrar-entrega-pedido-form registarPedidoForm></registrar-entrega-pedido-form>
             </div>
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(3)" >      
+            <toolbar-consulta-producto></toolbar-consulta-producto>
+            <consultar-productos-form consultarProductosForm></consultar-productos-form>  
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(4)" >      
+            <toolbar-consulta-suministros></toolbar-consulta-suministros>
+            <consultar-materias-form consultarMateriasForm></consultar-materias-form>  
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(5)" >      
+            <toolbar-consulta-suministros></toolbar-consulta-suministros>
+            <consultar-componentes-form consultarComponentesForm></consultar-componentes-form>  
         </div>
     </div>
 </div>

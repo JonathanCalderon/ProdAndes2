@@ -1,0 +1,27 @@
+<h2 class="form-title">Productos encontrados</h2>
+<div class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading">Items</div>
+    <!-- Table -->
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Estado</th>
+            <th>Nombre</th>
+            <th>Etapa</th>
+            <th>Id Pedido</th>
+            
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="producto in consultarProductosCtrl.productos | orderBy: 'id'">
+            <td>{{producto.id}}</td>
+            <td>{{producto.ESTADO}}</td>
+            <td>{{producto.NOMBRE_PRODUCTO}}</td>
+            <td>{{producto.ETAPA}}</td>
+            <td>{{producto.ID_PEDIDO}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div> 
