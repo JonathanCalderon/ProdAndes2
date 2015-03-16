@@ -264,6 +264,92 @@
             controllerAs:'listaComponentesConsulta'
         };
     });
+    prodAndes.directive('registrarProveedorForm', function(){
+        return{
+            restrict:'E',
+            templateUrl:'partials/registrar-proveedor-form.html',
+            controller: ['$http',function($http){
+                var self=this;
+                self.proveedor={};
+                this.addProveedor=function(proveedorParam){
 
+                	self.proveedor = proveedorParam,
+                	console.log('Que es esto '+JSON.stringify(proveedorParam));console.log('Form pedido '+JSON.stringify(self.proveedor));
+                    $http.post('http://localhost:8080/backend/ServiciosMock/registrarProveedor'
+                    	, self.proveedor).success(function(data){
+                    	alert("Respuesta "+data.Respuesta);
+                        self.proveedor={};
+                    });
+                };
+            }],
+            controllerAs:'registrarProveedorCtrl'
+        };
+    });
+    
+    prodAndes.directive('registrarLlegadaMaterialForm', function(){
+        return{
+            restrict:'E',
+            templateUrl:'partials/registrar-llegada-material-form.html',
+            controller: ['$http',function($http){
+                var self=this;
+                self.llegada={};
+                this.addLlegadaMaterial=function(llegadaParam){
+
+                	self.llegada = llegadaParam,
+                	console.log('Que es esto '+JSON.stringify(llegadaParam));console.log('Form pedido '+JSON.stringify(self.llegada));
+                    $http.post('http://localhost:8080/backend/ServiciosMock/llegadaMaterial'
+                    	, self.llegada).success(function(data){
+                    	alert("Respuesta "+data.Respuesta);
+                        self.llegada={};
+                    });
+                };
+            }],
+            controllerAs:'registrarLlegadaMaterialCtrl'
+        };
+    });
+    
+    prodAndes.directive('registrarLlegadaComponenteForm', function(){
+        return{
+            restrict:'E',
+            templateUrl:'partials/registrar-llegada-componente-form.html',
+            controller: ['$http',function($http){
+                var self=this;
+                self.llegada={};
+                this.addLlegadaComponente=function(llegadaParam){
+
+                	self.llegada = llegadaParam,
+                	console.log('Que es esto '+JSON.stringify(llegadaParam));console.log('Form pedido '+JSON.stringify(self.llegada));
+                    $http.post('http://localhost:8080/backend/ServiciosMock/llegadaComponente'
+                    	, self.llegada).success(function(data){
+                    	alert("Respuesta "+data.Respuesta);
+                        self.llegada={};
+                    });
+                };
+            }],
+            controllerAs:'registrarLlegadaComponenteCtrl'
+        };
+    });
+    
+    prodAndes.directive('registrarEjecucionEtapaForm', function(){
+        return{
+            restrict:'E',
+            templateUrl:'partials/registrar-ejecucion-etapa-form.html',
+            controller: ['$http',function($http){
+                var self=this;
+                self.ejecucionEtapa={};
+                this.addEjecucionEtapa=function(EjecucionEtapaP){
+
+                	self.ejecucionEtapa = EjecucionEtapaP,
+                	console.log('Form pedido '+JSON.stringify(self.ejecucionEtapa));
+                    $http.post('http://localhost:8080/backend/ServiciosMock/registrarEjecucionEtapa'
+                    	, self.ejecucionEtapa).success(function(data){
+                    	alert("Respuesta se ha registrado la entrega del pedido");
+                        self.ejecucionEtapa={};
+                    });
+                };
+            }],
+            controllerAs:'registrarEjecucionEtapaCtrl'
+        };
+    });
 })();
 

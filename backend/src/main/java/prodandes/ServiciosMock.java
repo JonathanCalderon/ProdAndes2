@@ -124,4 +124,48 @@ public class ServiciosMock {
         }
         return jA;
     }
+    
+        @POST
+    @Path("/registrarProveedor")
+    public JSONObject registrarProveedor(JSONObject jO) throws Exception {
+
+        System.out.println("jO " + jO.toJSONString());
+        System.out.println("jO " + jO.toString());
+        JSONObject jr = new JSONObject();
+        jr.put("Respuesta", "Hola");
+        return jr;
+    }
+    
+        @POST
+    @Path("/registrarEjecucionEtapa")
+    public JSONObject registrarEjecucionEtapa(JSONObject jO) throws Exception {
+
+        System.out.println("jO " + jO.toJSONString());
+        System.out.println("jO " + jO.toString());
+        JSONObject jr = new JSONObject();
+        jr.put("Respuesta", "Hola");
+        return jr;
+    }
+    
+        @POST
+    @Path("/llegadaComponente")
+    public JSONObject llegadaComponente(JSONObject jO) throws Exception {
+
+        System.out.println("jO " + jO.toJSONString());
+        System.out.println("jO " + jO.toString());
+        JSONObject jr = new JSONObject();
+        jr.put("Respuesta", "Hola");
+        return jr;
+    }
+    
+        @POST
+    @Path("/llegadaMaterial")
+    public JSONObject llegadaMaterial(JSONObject jO) throws Exception {
+
+        System.out.println("jO " + jO.toJSONString());
+        System.out.println("jO " + jO.toString());
+        JSONObject jr = new JSONObject();
+        jr.put("Respuesta", "Hola");
+        return jr;
+    }
 }

@@ -42,6 +42,26 @@ and open the template in the editor.
             <toolbar-consulta-suministros></toolbar-consulta-suministros>
             <consultar-componentes-form consultarComponentesForm></consultar-componentes-form>  
         </div>
+          <div ng-if="toolbar.isSelected(6)">
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <registrar-proveedor-form registarProveedorForm></registrar-proveedor-form>
+            </div>
+        </div>
+        <div ng-if="toolbar.isSelected(7)">
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <registrar-llegada-material-form registrarLlegadaMaterialForm></registrar-llegada-material-form>
+            </div>
+        </div>
+        <div ng-if="toolbar.isSelected(8)">
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <registrar-llegada-componente-form registrarLlegadaComponenteForm></registrar-llegada-componente-form>
+            </div>
+        </div>
+        <div ng-if="toolbar.isSelected(9)">
+            <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+                <registrar-ejecucion-etapa-form registrarEjecucionEtapaForm></registrar-ejecucion-etapa-form>
+            </div>
+        </div>
     </div>
 </div>
 <script type="text/javascript" src="js/angular.min.js"></script>
