@@ -61,9 +61,9 @@ public class Prodandes {
             System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
             Calendar cEsp = new GregorianCalendar();
             cEsp.setTime(date);
-            
-            String sFecha = cEsp.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(cEsp.get(GregorianCalendar.MONTH)+1)
-                    +"-"+cEsp.get(GregorianCalendar.YEAR);
+
+            String sFecha = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                    + "-" + cEsp.get(GregorianCalendar.YEAR);
 
             System.out.println("Fecha: " + sFecha);
 
@@ -231,8 +231,9 @@ public class Prodandes {
      *
      * @param id_pedido
      */
-    public void registrarEntregaPedidoProductosCliente(int id_pedido) throws Exception {
+    public void registrarEntregaPedidoProductosCliente(JSONObject jP) throws Exception {
 
+        int id_pedido = (int) jP.get("id_pedido");
         abrirConexion();
         String query = "select cantidad_producto from PEDIDO_PRODUCTO WHERE ID=" + id_pedido;
 
@@ -309,7 +310,7 @@ public class Prodandes {
 
                 String nomProd = rs.getString("nombreProducto");
 
-                sql = "Select * from ITEM where nombre_producto='" + nomProd + "'";
+                sql = "Select * from ITEM where nombre_producto='" + nomProd + "' AND ESTADO='Bodega'";
 
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
@@ -337,13 +338,13 @@ public class Prodandes {
 
             while (rs2.next()) {
 
-                JSONObject jO = new JSONObject();
-                jO.put("id", rs2.getInt("id"));
-                jO.put("estado", rs2.getString("estado"));
-                jO.put("nombre_producto", rs2.getString("nombre_producto"));
-                jO.put("etapa", rs2.getString("etapa"));
-                jO.put("id_pedido", rs2.getString("id_pedido"));
-                jArray.add(jO);
+                JSONObject jObject = new JSONObject();
+                jObject.put("id", rs2.getInt("id"));
+                jObject.put("ESTADO", rs2.getString("ESTADO"));
+                jObject.put("NOMBRE_PRODUCTO", rs2.getString("NOMBRE_PRODUCTO"));
+                jObject.put("ETAPA", rs2.getInt("ETAPA"));
+                jObject.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                jArray.add(jObject);
             }
 
             st2.close();
@@ -355,11 +356,11 @@ public class Prodandes {
             System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
             Calendar cEsp = new GregorianCalendar();
             cEsp.setTime(date);
-            
-            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(cEsp.get(GregorianCalendar.MONTH)+1)
-                    +"-"+cEsp.get(GregorianCalendar.YEAR);
-            
 
+            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                    + "-" + cEsp.get(GregorianCalendar.YEAR);
+
+            System.out.println("Fecha "+fechaS);
             String sql = "select * from PEDIDO_PRODUCTO where fecha_solicitud = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
             Statement st = con.createStatement();
@@ -392,10 +393,9 @@ public class Prodandes {
             System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
             Calendar cEsp = new GregorianCalendar();
             cEsp.setTime(date);
-            
-            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(cEsp.get(GregorianCalendar.MONTH)+1)
-                    +"-"+cEsp.get(GregorianCalendar.YEAR);
-            
+
+            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                    + "-" + cEsp.get(GregorianCalendar.YEAR);
 
             String sql = "select * from PEDIDO_PRODUCTO where fecha_entrega = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
@@ -431,15 +431,20 @@ public class Prodandes {
     @Path("/consultarMateriasPrimas")
     public JSONArray consultarMateriasPrimas(JSONObject jP) throws Exception {
 
+        System.out.println("LLEGO");
+        System.out.println("PArametro " + jP.toJSONString());
         JSONArray jArray = new JSONArray();
         abrirConexion();
+        String criterio = jP.get("Criterio").toString();
 
-        String criterio = jP.toString();
+        System.out.println("Criterio " + criterio);
         if (criterio.equalsIgnoreCase("Rango")) {
 
-            int rango1 = (int) jP.get("rango 1");
-            int rango2 = (int) jP.get("rango 2");
+            int rango1 = (int) jP.get("Rango1");
+            int rango2 = (int) jP.get("Rango2");
 
+            System.out.println("Rango1" + rango1);
+            System.out.println("Rango2" + rango2);
             String sql = "Select * from (Select Materia_Prima.Nombre as nombreMateria,count(*) as "
                     + "cantidadInventario "
                     + "from (Materia_Prima_Item inner join Materia_Prima on "
@@ -454,7 +459,9 @@ public class Prodandes {
 
                 String materia = rs.getString("nombreMateria");
 
-                sql = "Select * from Materia_Prima_Item where materia='" + materia + "'";
+                System.out.println("Materia " + materia);
+                sql = "Select * from Materia_Prima_Item where materia='" + materia + "' "
+                        + "AND Estado='Bodega'";
 
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
@@ -479,12 +486,22 @@ public class Prodandes {
             System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
             Calendar cEsp = new GregorianCalendar();
             cEsp.setTime(date);
-            
-            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(cEsp.get(GregorianCalendar.MONTH)+1)
-                    +"-"+cEsp.get(GregorianCalendar.YEAR);
-            
 
-            String sql = "select * from PEDIDO_MATERIA_PRIMA where fecha_pedido = "
+            String dia = ((cEsp.get(GregorianCalendar.DAY_OF_MONTH)+"").length()<2)?
+                    "0"+(cEsp.get(GregorianCalendar.DAY_OF_MONTH)):
+                    (cEsp.get(GregorianCalendar.DAY_OF_MONTH))+"";
+            String mes = (((cEsp.get(GregorianCalendar.MONTH)+1)+"").length()<2)?
+                    "0"+(cEsp.get(GregorianCalendar.MONTH)+1):
+                    (cEsp.get(GregorianCalendar.MONTH)+1)+"";
+            String año = ((cEsp.get(GregorianCalendar.YEAR)+"").length()<2)?
+                    "0"+(cEsp.get(GregorianCalendar.YEAR)):
+                    (cEsp.get(GregorianCalendar.YEAR))+"";
+            String fechaS = dia+ "-" + mes+"-" + año;
+
+            System.out.println("FEcha pedido "+fechaS);
+            
+            String sql = "select * from PEDIDO_MATERIA_PRIMA "
+                    + "where FECHA_PEDIDO="
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -492,6 +509,7 @@ public class Prodandes {
             while (rs.next()) {
 
                 int id_pedido = rs.getInt("id");
+                System.out.println("id_pedido "+id_pedido);
                 sql = "select * from MATERIA_PRIMA_ITEM where ID_PEDIDO =" + id_pedido;
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
@@ -515,12 +533,11 @@ public class Prodandes {
             System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
             Calendar cEsp = new GregorianCalendar();
             cEsp.setTime(date);
-            
-            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(cEsp.get(GregorianCalendar.MONTH)+1)
-                    +"-"+cEsp.get(GregorianCalendar.YEAR);
-            
 
-            String sql = "select * from PEDIDO_MATERIA_PRIMA where fecha_entrega = "
+            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                    + "-" + cEsp.get(GregorianCalendar.YEAR);
+
+            String sql = "select * from PEDIDO_MATERIA_PRIMA where fecha_entrega="
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -548,6 +565,7 @@ public class Prodandes {
 
             String tipo = jP.get("Tipo_material").toString();
 
+            System.out.println("TIPO " + tipo);
             String sql = "select * from MATERIA_PRIMA where TIPO = '" + tipo + "'";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -555,6 +573,7 @@ public class Prodandes {
             while (rs.next()) {
 
                 String nombreMateria = rs.getString("nombre");
+                System.out.println("Nombre materia " + nombreMateria);
                 sql = "select * from MATERIA_PRIMA_ITEM where materia = '" + nombreMateria + "'";
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
@@ -581,11 +600,11 @@ public class Prodandes {
         JSONArray jArray = new JSONArray();
         abrirConexion();
 
-        String criterio = jP.toString();
+        String criterio = jP.get("Criterio").toString();
         if (criterio.equalsIgnoreCase("Rango")) {
 
-            int rango1 = (int) jP.get("rango 1");
-            int rango2 = (int) jP.get("rango 2");
+            int rango1 = (int) jP.get("Rango1");
+            int rango2 = (int) jP.get("Rango2");
 
             String sql = "Select * from (Select Componente.Nombre as nombreComponente,count(*) as "
                     + "cantidadInventario "
@@ -601,7 +620,8 @@ public class Prodandes {
 
                 String componente = rs.getString("nombreComponente");
 
-                sql = "Select * from componente_item where componente='" + componente + "'";
+                sql = "Select * from componente_item where componente='" + componente + "'"
+                        + "AND Estado ='Bodega'";
 
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
@@ -610,7 +630,7 @@ public class Prodandes {
                     JSONObject jO = new JSONObject();
                     jO.put("id", rs2.getInt("id"));
                     jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("componente", rs2.getString("componente"));
+                    jO.put("COMPONENTE", rs2.getString("COMPONENTE"));
                     jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
 
                     jArray.add(jO);
@@ -626,10 +646,9 @@ public class Prodandes {
             System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
             Calendar cEsp = new GregorianCalendar();
             cEsp.setTime(date);
-            
-            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(cEsp.get(GregorianCalendar.MONTH)+1)
-                    +"-"+cEsp.get(GregorianCalendar.YEAR);
-            
+
+            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                    + "-" + cEsp.get(GregorianCalendar.YEAR);
 
             String sql = "select * from PEDIDO_COMPONENTE where fecha_pedido = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
@@ -662,11 +681,9 @@ public class Prodandes {
             System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
             Calendar cEsp = new GregorianCalendar();
             cEsp.setTime(date);
-            
-            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(cEsp.get(GregorianCalendar.MONTH)+1)
-                    +"-"+cEsp.get(GregorianCalendar.YEAR);
-            
-            
+
+            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                    + "-" + cEsp.get(GregorianCalendar.YEAR);
 
             String sql = "select * from PEDIDO_componente where fecha_entrega = "
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";

@@ -47,7 +47,7 @@
 
                 	self.pedido = pedidoParam,
                 	console.log('Form pedido '+JSON.stringify(self.pedido));
-                    $http.post('http://localhost:8080/backend/ServiciosMock/registrarPedido'
+                    $http.post('http://localhost:8080/backend/Servicios/registrarPedido'
                     	, self.pedido).success(function(data){
                          alert("Respuesta "+data.Respuesta);
                          self.pedido={};
@@ -69,7 +69,7 @@
 
                 	self.pedido = pedidoParam,
                 	console.log('Form pedido '+JSON.stringify(self.pedido));
-                    $http.post('http://localhost:8080/backend/ServiciosMock/registrarEntregaPedidoProductosCliente'
+                    $http.post('http://localhost:8080/backend/Servicios/registrarEntregaPedidoProductosCliente'
                     	, self.pedido).success(function(data){
                          alert("Respuesta se ha registrado la entrega del pedido");
                          self.pedido={};
@@ -138,7 +138,7 @@
                     self.consulta = consultaParam,
                     self.consulta.Criterio = criterio;
                     console.log('Form consulta '+JSON.stringify(self.consulta));
-                    $http.post('http://localhost:8080/backend/ServiciosMock/consultarProductos' , self.consulta).success(function(data){
+                    $http.post('http://localhost:8080/backend/Servicios/consultarProductos' , self.consulta).success(function(data){
 
                         console.log("Consultar productos "+JSON.stringify(data));
                         self.productos=data;
@@ -185,11 +185,11 @@
 
                     self.materias = [];
 
-                    console.log("Criterio "+criterio)
+                    console.log("Criterio MAterias "+criterio)
                     self.consulta = consultaParam,
                     self.consulta.Criterio = criterio;
-                    console.log('Form consulta '+JSON.stringify(self.consulta));
-                    $http.post('http://localhost:8080/backend/ServiciosMock/consultarMateriasPrimas', self.consulta).success(function(data){
+                    console.log('Form consulta materias '+JSON.stringify(self.consulta));
+                    $http.post('http://localhost:8080/backend/Servicios/consultarMateriasPrimas', self.consulta).success(function(data){
 
                         console.log("Consultar materias "+JSON.stringify(data));
                         self.materias=data;
@@ -239,7 +239,7 @@
                     self.consulta = consultaParam,
                     self.consulta.Criterio = criterio;
                     console.log('Form consulta '+JSON.stringify(self.consulta));
-                    $http.post('http://localhost:8080/backend/ServiciosMock/consultarComponentes', self.consulta).success(function(data){
+                    $http.post('http://localhost:8080/backend/Servicios/consultarComponentes', self.consulta).success(function(data){
 
                         console.log("Consultar Componentes "+JSON.stringify(data));
                         self.componentes=data;
