@@ -275,7 +275,7 @@
 
                 	self.proveedor = proveedorParam,
                 	console.log('Que es esto '+JSON.stringify(proveedorParam));console.log('Form pedido '+JSON.stringify(self.proveedor));
-                    $http.post('http://localhost:8080/backend/ServiciosMock/registrarProveedor'
+                    $http.post('http://localhost:8080/backend/Servicios/registrarProveedor'
                     	, self.proveedor).success(function(data){
                     	alert("Respuesta "+data.Respuesta);
                         self.proveedor={};
@@ -297,7 +297,7 @@
 
                 	self.llegada = llegadaParam,
                 	console.log('Que es esto '+JSON.stringify(llegadaParam));console.log('Form pedido '+JSON.stringify(self.llegada));
-                    $http.post('http://localhost:8080/backend/ServiciosMock/llegadaMaterial'
+                    $http.post('http://localhost:8080/backend/Servicios/registrarLlegadaDeMaterial'
                     	, self.llegada).success(function(data){
                     	alert("Respuesta "+data.Respuesta);
                         self.llegada={};
@@ -319,7 +319,7 @@
 
                 	self.llegada = llegadaParam,
                 	console.log('Que es esto '+JSON.stringify(llegadaParam));console.log('Form pedido '+JSON.stringify(self.llegada));
-                    $http.post('http://localhost:8080/backend/ServiciosMock/llegadaComponente'
+                    $http.post('http://localhost:8080/backend/Servicios/registrarLlegadaDeComponentes'
                     	, self.llegada).success(function(data){
                     	alert("Respuesta "+data.Respuesta);
                         self.llegada={};
@@ -341,7 +341,7 @@
 
                 	self.ejecucionEtapa = EjecucionEtapaP,
                 	console.log('Form pedido '+JSON.stringify(self.ejecucionEtapa));
-                    $http.post('http://localhost:8080/backend/ServiciosMock/registrarEjecucionEtapa'
+                    $http.post('http://localhost:8080/backend/Servicios/registrarEjecucionEtapa'
                     	, self.ejecucionEtapa).success(function(data){
                     	alert("Respuesta se ha registrado la entrega del pedido");
                         self.ejecucionEtapa={};

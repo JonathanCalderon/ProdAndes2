@@ -942,27 +942,36 @@ public class Prodandes {
         cerrarConexion();
     }
 
+    
+    @POST
+    @Path("/registrarProveedor")
     public void registrarProveedor(JSONObject proveedor) throws Exception {
-        int doc = Integer.parseInt(proveedor.get(0).toString());
-        String nombre = proveedor.get(1).toString();
-        String ciudad = proveedor.get(2).toString();
-        String direccion = proveedor.get(3).toString();
-        String telefono = proveedor.get(4).toString();
-        int volumenMax = Integer.parseInt(proveedor.get(5).toString());
-        int tiempoResp = Integer.parseInt(proveedor.get(6).toString());
-        String representante = proveedor.get(7).toString();
-        String sql = "select max (id) as MAXIMO from PROVEEDOR";
-        Statement st = con.createStatement();
-        ResultSet rs = st.executeQuery(sql);
-        st.close();
-        int id_item = -1;
-        if (rs.next()) {
-            id_item = rs.getInt("MAXIMO") + 1;
-        }
-        sql = "INSERT INTO PROVEEDOR (DOCUMENTO_ID,NOMBRE,CIUDAD,DIRECCION,TELEFONO,VOLUMEN_MAXIMO,TIEMPO_ENTREGA,REPRESENTANTE_LEGAL)" + " VALUES (" + doc + ",'" + nombre + "','" + ciudad + "','" + direccion + "','" + telefono + "'," + volumenMax + "," + tiempoResp + ",'" + representante + "')";
+        abrirConexion();
+        System.out.println("- - - - - - - - - - - - - - - - - Print Entrada - - - - - - - - - - - - - - - - -");
+        System.out.println(proveedor);
+        int doc = Integer.parseInt(proveedor.get("documento").toString());
+        String nombre = proveedor.get("nombre").toString();
+        String ciudad = proveedor.get("ciudad").toString();
+        String direccion = proveedor.get("direccion").toString();
+        String telefono = proveedor.get("telefono").toString();
+        int volumenMax = Integer.parseInt(proveedor.get("volumenMaximo").toString());
+        int tiempoResp = Integer.parseInt(proveedor.get("tiempoDeEntrega").toString());
+        String representante = proveedor.get("representanteLegal").toString();
+//        String sql = "select max (id) as MAXIMO from PROVEEDOR";
+//        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+//        System.out.println(sql);
+//        Statement st = con.createStatement();
+//        ResultSet rs = st.executeQuery(sql);
+//        st.close();
+//        int id_item = -1;
+//        if (rs.next()) {
+//            id_item = rs.getInt("MAXIMO") + 1;
+//        }
+        String sql = "INSERT INTO PROVEEDOR (DOCUMENTO_ID,NOMBRE,CIUDAD,DIRECCION,TELEFONO,VOLUMEN_MAXIMO,TIEMPO_DE_ENTREGA,REPRESENTANTE_LEGAL)" + " VALUES ('" + doc + "','" + nombre + "','" + ciudad + "','" + direccion + "','" + telefono + "'," + volumenMax + "," + tiempoResp + "," + representante + ")";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(sql);
         Statement st2 = con.createStatement();
         st2.executeUpdate(sql);
-        st2.close();
         st2.close();
         cerrarConexion();
     }
@@ -970,6 +979,7 @@ public class Prodandes {
     @POST
     @Path("/registrarLlegadaDeMaterial")
     public void registrarLlegadaDeMaterial(JSONObject idPedidoMateriaPrimaP) throws Exception {
+        abrirConexion();
         int idPedidoMateriaPrima = Integer.parseInt(idPedidoMateriaPrimaP.get("id").toString());
         System.out.println("Entrada parÃ¡metro registrarLlegadaDeMaterial");
         System.out.println(idPedidoMateriaPrima);
@@ -977,10 +987,14 @@ public class Prodandes {
         String fecha = c.get(GregorianCalendar.DAY_OF_MONTH) + "-"
                 + c.get(GregorianCalendar.MONTH) + "-" + c.get(GregorianCalendar.YEAR);
         String query = "update PEDIDO_MATERIA_PRIMA set FECHA_ENTREGA = TO_DATE ('" + fecha + "','DD-MM-YYYY') WHERE ID = " + idPedidoMateriaPrima;
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query);
         Statement st = con.createStatement();
         st.executeQuery(query);
         st.close();
-        query = "update ITEM_MATERIA_PRIMA set ESTADO = 'En bodega' WHERE ID_PEDIDO =" + idPedidoMateriaPrima;
+        query = "update MATERIA_PRIMA_ITEM set ESTADO = 'En Bodega' WHERE ID_PEDIDO =" + idPedidoMateriaPrima;
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query);
         st = con.createStatement();
         st.executeQuery(query);
         st.close();
@@ -990,17 +1004,25 @@ public class Prodandes {
     @POST
     @Path("/registrarLlegadaDeComponentes")
     public void registrarLlegadaDeComponentes(JSONObject idPedidoComponenteP) throws Exception {
+        abrirConexion();
         int idPedidoComponente = Integer.parseInt(idPedidoComponenteP.get("id").toString());
-        System.out.println("Entrada parÃ¡metro registrarLlegadaDeMaterial");
+        System.out.println("Entrada parÃ¡metro registrarLlegadaDeMaterial");        
+        System.out.println("Marca 1");
         System.out.println(idPedidoComponente);
         Calendar c = new GregorianCalendar();
+        System.out.println("Marca 2");
         String fecha = c.get(GregorianCalendar.DAY_OF_MONTH) + "-"
                 + c.get(GregorianCalendar.MONTH) + "-" + c.get(GregorianCalendar.YEAR);
+        System.out.println("Marca 3");
         String query = "update PEDIDO_COMPONENTE set FECHA_ENTREGA = TO_DATE ('" + fecha + "','DD-MM-YYYY') WHERE ID = " + idPedidoComponente;
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query);
         Statement st = con.createStatement();
         st.executeQuery(query);
         st.close();
-        query = "update ITEM_COMPONENTE set ESTADO = 'En bodega' WHERE ID_PEDIDO =" + idPedidoComponente;
+        query = "update COMPONENTE_ITEM set ESTADO = 'En Bodega' WHERE ID_PEDIDO =" + idPedidoComponente;
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query);
         st = con.createStatement();
         st.executeQuery(query);
         st.close();
@@ -1010,6 +1032,7 @@ public class Prodandes {
     @POST
     @Path("/registrarEjecucionEtapa")
     public JSONObject registrarEjecucionEtapa(JSONObject num_secuenciaP) throws Exception {
+        abrirConexion();
         int num_secuencia = Integer.parseInt(num_secuenciaP.get("secuencia").toString());
         //Verificar productos
         System.out.println("Entrada parÃ¡metro registrarEjecucionEtapa");
@@ -1098,6 +1121,7 @@ public class Prodandes {
     @POST
     @Path("/verificarProductosEstacionAnterior")
     public int verificarProductosEstacionAnterior(int numSecuencia) throws Exception {
+        abrirConexion();
         //Dar etapa y producto del num_secuencia
         String query3 = "select etapa, nombre_producto from ETAPA_DE_PRODUCCION where NUMERO_SECUENCIA = " + numSecuencia;
         Statement st3 = con.createStatement();
