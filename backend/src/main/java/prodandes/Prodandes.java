@@ -878,6 +878,8 @@ public class Prodandes {
         cerrarConexion();
     }
     
+    @POST
+    @Path("/registrarProveedor")
     public void registrarProveedor(JSONObject proveedor) throws Exception {
             int doc = Integer.parseInt(proveedor.get(0).toString());
             String nombre = proveedor.get(1).toString();
