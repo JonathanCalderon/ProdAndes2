@@ -391,5 +391,34 @@
             controllerAs:'etapaMayorMovimientoCtrl'
         };
     });
+    
+    prodAndes.directive('operarioMasActivoForm', function(){
+
+        return{
+            restrict:'E',
+            templateUrl: 'partials/operario-mas-activo-form.html',
+            controller: ['$http',function($http){
+                var self = this;
+                
+                self.consulta = {};   
+
+                this.enviarConsulta=function(consultaParam){
+
+                    
+                    self.consulta = consultaParam,
+                    console.log('Form consulta '+JSON.stringify(self.consulta));
+                    $http.post('http://localhost:8080/backend/Servicios/operarioMasActivo', self.consulta).success(function(data){
+
+                        console.log("Operario mas activo en etapa:"+JSON.stringify(data));
+                        alert(JSON.stringify(data));
+                        self.consulta={};
+                    });
+
+
+                };
+            }],
+            controllerAs:'operarioMasActivoCtrl'
+        };
+    });
 })();
 

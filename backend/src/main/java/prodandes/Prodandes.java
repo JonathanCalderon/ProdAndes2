@@ -1229,4 +1229,69 @@ public class Prodandes {
         
         return resp;
     }    
+    
+    // Operario mas activo
+    @POST
+    @Path("/operarioMasActivo")
+    public JSONObject operarioMasActivo(JSONObject jO) throws Exception {
+        
+        abrirConexion();
+        int num_secuencia = Integer.parseInt(jO.get("secuencia").toString());
+
+        
+        String query5 = "select * from OPERARIO natural join ("
+                + "select DOCUMENTO_OPERARIO as DOCUMENTO_ID, CUENTA from ("
+                + "select * from (select DOCUMENTO_OPERARIO, count(ID_ETAPA) as cuenta from ETAPAS_OPERARIOS where ID_ETAPA= "+num_secuencia+" group by DOCUMENTO_OPERARIO) "
+                + "where cuenta=("
+                + "SELECT max(count(ID_ETAPA)) as cuenta from ETAPAS_OPERARIOS "
+                + "where ID_ETAPA= "+num_secuencia
+                + " group by DOCUMENTO_OPERARIO)))";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query5);
+        Statement st5 = con.createStatement();
+        ResultSet rs5 = st5.executeQuery(query5);
+        JSONObject operario = new JSONObject();
+        String documento_id = "";
+        String nombre = "";
+        String nacionalidad = "";
+        String direccion = "";
+        String email ="";
+        String telefono ="";
+        String ciudad ="";
+        String departamento ="";
+        String codigo_postal ="";
+        JSONArray lista = new JSONArray();
+        int i = 0;
+        while (rs5.next()) {
+            i++;
+            System.out.println("Numero del ciclo: "+i);
+            documento_id = rs5.getString("DOCUMENTO_ID");
+            nombre = rs5.getString("NOMBRE");
+            nacionalidad = rs5.getString("NACIONALIDAD");
+            direccion = rs5.getString("DIRECCION");
+            email = rs5.getString("EMAIL");
+            telefono = rs5.getString("TELEFONO");
+            ciudad = rs5.getString("CIUDAD");
+            departamento = rs5.getString("DEPARTAMENTO");
+            codigo_postal = rs5.getString("CODIGO_POSTAL");
+            operario.put("DOCUMENTO_ID", documento_id);
+            operario.put("NOMBRE", nombre);
+            operario.put("NACIONALIDAD", nacionalidad);
+            operario.put("DIRECCION", direccion);
+            operario.put("EMAIL", email);
+            operario.put("TELEFONO", telefono);
+            operario.put("CIUDAD", ciudad);
+            operario.put("DEPARTAMENTO", departamento);
+            operario.put("CODIGO_POSTAL", codigo_postal);
+            System.out.println("Operario: "+operario);
+            lista.add(operario);
+        }
+        System.out.println("Lista: "+lista);
+        st5.close();
+        cerrarConexion();
+        JSONObject resp = new JSONObject();
+        resp.put("operarios",lista.toString());
+        System.out.println("Respuesta: "+resp.toString());
+        return resp;
+    } 
 }
