@@ -317,11 +317,11 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jObject = new JSONObject();
-                    jObject.put("id", rs2.getInt("id"));
-                    jObject.put("ESTADO", rs2.getString("ESTADO"));
-                    jObject.put("NOMBRE_PRODUCTO", rs2.getString("NOMBRE_PRODUCTO"));
-                    jObject.put("ETAPA", rs2.getInt("ETAPA"));
-                    jObject.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jObject.put("Id", rs2.getInt("id"));
+                    jObject.put("Estado", rs2.getString("ESTADO"));
+                    jObject.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
+                    jObject.put("Etapa", rs2.getInt("ETAPA"));
+                    jObject.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jObject);
                 }
 
@@ -339,11 +339,11 @@ public class Prodandes {
             while (rs2.next()) {
 
                 JSONObject jObject = new JSONObject();
-                jObject.put("id", rs2.getInt("id"));
-                jObject.put("ESTADO", rs2.getString("ESTADO"));
-                jObject.put("NOMBRE_PRODUCTO", rs2.getString("NOMBRE_PRODUCTO"));
-                jObject.put("ETAPA", rs2.getInt("ETAPA"));
-                jObject.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                jObject.put("Id", rs2.getInt("id"));
+                    jObject.put("Estado", rs2.getString("ESTADO"));
+                    jObject.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
+                    jObject.put("Etapa", rs2.getInt("ETAPA"));
+                    jObject.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                 jArray.add(jObject);
             }
 
@@ -375,11 +375,11 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("NOMBRE_PRODUCTO", rs2.getString("NOMBRE_PRODUCTO"));
-                    jO.put("ETAPA", rs2.getInt("ETAPA"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
+                    jO.put("Etapa", rs2.getInt("ETAPA"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
                 }
                 st2.close();
@@ -411,11 +411,11 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("NOMBRE_PRODUCTO", rs2.getString("NOMBRE_PRODUCTO"));
-                    jO.put("ETAPA", rs2.getInt("ETAPA"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
+                    jO.put("Etapa", rs2.getInt("ETAPA"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
                 }
                 st2.close();
@@ -468,10 +468,10 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("MATERIA", rs2.getString("MATERIA"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("MateriaPrima", rs2.getString("MATERIA"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
 
                     jArray.add(jO);
                 }
@@ -509,10 +509,10 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("MATERIA", rs2.getString("MATERIA"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("MateriaPrima", rs2.getString("MATERIA"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
                 }
                 st2.close();
@@ -544,10 +544,10 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("MATERIA", rs2.getString("MATERIA"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("MateriaPrima", rs2.getString("MATERIA"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
                 }
                 st2.close();
@@ -573,10 +573,10 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("MATERIA", rs2.getString("MATERIA"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("MateriaPrima", rs2.getString("MATERIA"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
 
                 }
@@ -621,10 +621,10 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("COMPONENTE", rs2.getString("COMPONENTE"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("Componente", rs2.getString("COMPONENTE"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
 
                     jArray.add(jO);
                 }
@@ -657,10 +657,10 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("COMPONENTE", rs2.getString("COMPONENTE"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("Componente", rs2.getString("COMPONENTE"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
                 }
                 st2.close();
@@ -692,10 +692,10 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("COMPONENTE", rs2.getString("COMPONENTE"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("Componente", rs2.getString("COMPONENTE"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
                 }
                 st2.close();
@@ -719,10 +719,10 @@ public class Prodandes {
 
                 while (rs2.next()) {
                     JSONObject jO = new JSONObject();
-                    jO.put("id", rs2.getInt("id"));
-                    jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("COMPONENTE", rs2.getString("COMPONENTE"));
-                    jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
+                    jO.put("Id", rs2.getInt("id"));
+                    jO.put("Estado", rs2.getString("ESTADO"));
+                    jO.put("Componente", rs2.getString("COMPONENTE"));
+                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
 
                 }
