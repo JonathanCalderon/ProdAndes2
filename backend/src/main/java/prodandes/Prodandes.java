@@ -1192,6 +1192,8 @@ public class Prodandes {
     @POST
     @Path("/consultarEtapaProduccionMayorMovimiento")
     public JSONObject consultarEtapaProduccionMayorMovimiento(JSONObject jO) throws Exception {
+        
+        abrirConexion();
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         java.util.Date dateIni = format.parse(jO.get("fechaInicio").toString());
         java.util.Date dateFin = format.parse(jO.get("fechaFin").toString());
@@ -1201,10 +1203,10 @@ public class Prodandes {
         dateFinCalendar.setTime(dateFin);
         String query5 = "SELECT * from ("
                 + "SELECT CODIGO_SECUENCIA, count(FECHA) as cuenta from ("
-                + "select * from ETAPA_FECHA where TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')>ETAPA_FECHA.FECHA AND TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')<ETAPA_FECHA.FECHA)"
+                + "select * from ETAPA_FECHA where TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(dateFinCalendar.get(GregorianCalendar.MONTH)+1)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')>ETAPA_FECHA.FECHA AND TO_DATE('"+dateIniCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(dateIniCalendar.get(GregorianCalendar.MONTH)+1)+"-"+dateIniCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')<ETAPA_FECHA.FECHA)"
                 + "GROUP BY CODIGO_SECUENCIA) where cuenta = ("
-                + "SELECT max (count(FECHA)) from (select * from ETAPA_FECHA where TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')>ETAPA_FECHA.FECHA AND TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')<ETAPA_FECHA.FECHA) "
-                + "GROUP BY CODIGO_SECUENCIA);";
+                + "SELECT max (count(FECHA)) from (select * from ETAPA_FECHA where TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(dateFinCalendar.get(GregorianCalendar.MONTH)+1)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')>ETAPA_FECHA.FECHA AND TO_DATE('"+dateIniCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+(dateIniCalendar.get(GregorianCalendar.MONTH)+1)+"-"+dateIniCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')<ETAPA_FECHA.FECHA) "
+                + "GROUP BY CODIGO_SECUENCIA)";
         System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
         System.out.println(query5);
         Statement st5 = con.createStatement();
@@ -1223,6 +1225,8 @@ public class Prodandes {
         JSONObject resp = new JSONObject();
         resp.put("CODIGO_SECUENCIA", etapaMaxima);
         resp.put("CUENTA", numeroMaximo);
+        cerrarConexion();
+        
         return resp;
     }    
 }

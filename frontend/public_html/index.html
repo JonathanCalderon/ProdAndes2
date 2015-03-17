@@ -62,9 +62,14 @@ and open the template in the editor.
 
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(9)">
-
-            <registrar-ejecucion-etapa-form registrarEjecucionEtapaForm></registrar-ejecucion-etapa-form>
+            <registrar-ejecucion-etapa-form registrarEjecucionEtapaForm></registrar-ejecucion-etapa-form>            
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(10)">
             
+            <etapa-mayor-movimiento-form etapaMayorMovimientoForm></etapa-mayor-movimiento-form>            
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(11)">
+            <operario-mas-activo-form operarioMasActivoForm></operario-mas-activo-form>            
         </div>
     </div>
 </div>

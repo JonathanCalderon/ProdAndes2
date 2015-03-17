@@ -362,5 +362,34 @@
             controllerAs:'registrarEjecucionEtapaCtrl'
         };
     });
+
+    prodAndes.directive('etapaMayorMovimientoForm', function(){
+
+        return{
+            restrict:'E',
+            templateUrl: 'partials/etapa-mayor-movimiento-form.html',
+            controller: ['$http',function($http){
+                var self = this;
+                
+                self.consulta = {};   
+
+                this.enviarConsulta=function(consultaParam){
+
+                    
+                    self.consulta = consultaParam,
+                    console.log('Form consulta '+JSON.stringify(self.consulta));
+                    $http.post('http://localhost:8080/backend/Servicios/consultarEtapaProduccionMayorMovimiento', self.consulta).success(function(data){
+
+                        console.log("Etapa mayor movimiento"+JSON.stringify(data));
+                        alert("La etapa más activa es: "+data.CODIGO_SECUENCIA+" con "+data.CUENTA+" ejecuciones.");
+                        self.consulta={};
+                    });
+
+
+                };
+            }],
+            controllerAs:'etapaMayorMovimientoCtrl'
+        };
+    });
 })();
 
