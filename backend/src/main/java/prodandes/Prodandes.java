@@ -1102,6 +1102,15 @@ public class Prodandes {
                 st4.close();
             }
         }
+        //Registrar etapa
+        Calendar c = new GregorianCalendar();
+        String fecha = c.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (c.get(GregorianCalendar.MONTH)+1) + "-" + c.get(GregorianCalendar.YEAR)+" "+c.get(GregorianCalendar.HOUR_OF_DAY)+":"+c.get(GregorianCalendar.MINUTE)+":"+c.get(GregorianCalendar.SECOND);
+        String query20 = "INSERT INTO ETAPA_FECHA (CODIGO_SECUENCIA, FECHA) VALUES ("+num_secuencia+", TO_DATE('"+fecha+"', 'DD-MM-YYYY HH24:MI:SS'))";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query20);
+        Statement st20 = con.createStatement();
+        st20.executeQuery(query20);
+        st20.close();
         //Reducir suministros COMPONENTE
         query3 = "select * from ITEM_COMPONENTE_ETAPA where NUMERO_SECUENCIA = " + num_secuencia;
         System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
@@ -1186,4 +1195,41 @@ public class Prodandes {
         System.out.println("Return verificarProductosEstacionAnterior: " + resp6);
         return resp6;
     }
+    // Comparar rangos
+    @POST
+    @Path("/consultarEtapaProduccionMayorMovimiento")
+    public JSONObject consultarEtapaProduccionMayorMovimiento(JSONObject jO) throws Exception {
+        DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        java.util.Date dateIni = format.parse(jO.get("fechaInicio").toString());
+        java.util.Date dateFin = format.parse(jO.get("fechaFin").toString());
+        Calendar dateIniCalendar = new GregorianCalendar();
+        dateIniCalendar.setTime(dateIni);
+        Calendar dateFinCalendar = new GregorianCalendar();
+        dateFinCalendar.setTime(dateFin);
+        String query5 = "SELECT * from ("
+                + "SELECT CODIGO_SECUENCIA, count(FECHA) as cuenta from ("
+                + "select * from ETAPA_FECHA where TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')>ETAPA_FECHA.FECHA AND TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')<ETAPA_FECHA.FECHA)"
+                + "GROUP BY CODIGO_SECUENCIA) where cuenta = ("
+                + "SELECT max (count(FECHA)) from (select * from ETAPA_FECHA where TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')>ETAPA_FECHA.FECHA AND TO_DATE('"+dateFinCalendar.get(GregorianCalendar.DAY_OF_MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.MONTH)+"-"+dateFinCalendar.get(GregorianCalendar.YEAR)+"','DD-MM-YYYY')<ETAPA_FECHA.FECHA) "
+                + "GROUP BY CODIGO_SECUENCIA);";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query5);
+        Statement st5 = con.createStatement();
+        ResultSet rs5 = st5.executeQuery(query5);
+        int numeroMaximo = 0;
+        String etapaMaxima = "";
+        if (rs5.next()) {
+            numeroMaximo = rs5.getInt("CUENTA");
+            System.out.println("CUENTA:");
+            System.out.println(numeroMaximo);
+            etapaMaxima = rs5.getString("CODIGO_SECUENCIA");
+            System.out.println("CODIGO_SECUENCIA:");
+            System.out.println(etapaMaxima);
+        }
+        st5.close();
+        JSONObject resp = new JSONObject();
+        resp.put("CODIGO_SECUENCIA", etapaMaxima);
+        resp.put("CUENTA", numeroMaximo);
+        return resp;
+    }    
 }
