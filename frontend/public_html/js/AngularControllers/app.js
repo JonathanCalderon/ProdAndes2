@@ -122,6 +122,7 @@
                 var self = this;
 
 
+                self.order='';
                 self.consulta = {};
                 self.productos = [];
 
@@ -129,14 +130,22 @@
                     return self.productos.length>0;
                 };
 
+                this.darOrder = function(){
+
+                    console.log('Dar order '+JSON.stringify(self.consulta.order));
+                    return self.consulta.order;
+                }
 
                 this.enviarConsulta=function(consultaParam,criterio){
 
                     self.productos = [];
+                    self.order='';
 
                     console.log("Criterio "+criterio)
                     self.consulta = consultaParam,
                     self.consulta.Criterio = criterio;
+                    self.order=self.consulta.order;
+
                     console.log('Form consulta '+JSON.stringify(self.consulta));
                     $http.post('http://localhost:8080/backend/Servicios/consultarProductos' , self.consulta).success(function(data){
 
@@ -172,7 +181,7 @@
             controller: ['$http',function($http){
                 var self = this;
 
-
+                self.order='';
                 self.consulta = {};
                 self.materias = [];
 
@@ -184,10 +193,11 @@
                 this.enviarConsulta=function(consultaParam,criterio){
 
                     self.materias = [];
-
+                    self.order = '';
                     console.log("Criterio MAterias "+criterio)
                     self.consulta = consultaParam,
                     self.consulta.Criterio = criterio;
+                    self.order = self.consulta.order;
                     console.log('Form consulta materias '+JSON.stringify(self.consulta));
                     $http.post('http://localhost:8080/backend/Servicios/consultarMateriasPrimas', self.consulta).success(function(data){
 
@@ -222,7 +232,7 @@
             controller: ['$http',function($http){
                 var self = this;
 
-
+                self.order='';
                 self.consulta = {};
                 self.componentes = [];
 
@@ -234,10 +244,11 @@
                 this.enviarConsulta=function(consultaParam,criterio){
 
                     self.componentes = [];
-
+                    self.order='';
                     console.log("Criterio "+criterio)
                     self.consulta = consultaParam,
                     self.consulta.Criterio = criterio;
+                    self.order= self.consulta.order;
                     console.log('Form consulta '+JSON.stringify(self.consulta));
                     $http.post('http://localhost:8080/backend/Servicios/consultarComponentes', self.consulta).success(function(data){
 

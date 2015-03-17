@@ -301,7 +301,7 @@ public class Prodandes {
             String sql = "Select * from (Select Producto.Nombre as nombreProducto,count(*) as cantidadInventario "
                     + "from (Item inner join Producto on "
                     + "Producto.nombre=Item.nombre_Producto)"
-                    + "WHERE Item.Estado ='Bodega' GROUP BY Producto.nombre) where cantidadInventario>" + rango1
+                    + "WHERE Item.Estado ='En Bodega' GROUP BY Producto.nombre) where cantidadInventario>" + rango1
                     + " AND cantidadInventario<" + rango2;
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
@@ -310,7 +310,7 @@ public class Prodandes {
 
                 String nomProd = rs.getString("nombreProducto");
 
-                sql = "Select * from ITEM where nombre_producto='" + nomProd + "' AND ESTADO='Bodega'";
+                sql = "Select * from ITEM where nombre_producto='" + nomProd + "' AND ESTADO='En Bodega'";
 
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
@@ -449,7 +449,7 @@ public class Prodandes {
                     + "cantidadInventario "
                     + "from (Materia_Prima_Item inner join Materia_Prima on "
                     + "Materia_Prima.nombre=Materia_Prima_Item.materia)"
-                    + "WHERE Materia_Prima_Item.Estado ='Bodega' "
+                    + "WHERE Materia_Prima_Item.Estado ='En Bodega' "
                     + "GROUP BY Materia_Prima.nombre) where cantidadInventario>" + rango1
                     + " AND cantidadInventario<" + rango2;
             Statement st = con.createStatement();
@@ -461,7 +461,7 @@ public class Prodandes {
 
                 System.out.println("Materia " + materia);
                 sql = "Select * from Materia_Prima_Item where materia='" + materia + "' "
-                        + "AND Estado='Bodega'";
+                        + "AND Estado='En Bodega'";
 
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
@@ -487,16 +487,9 @@ public class Prodandes {
             Calendar cEsp = new GregorianCalendar();
             cEsp.setTime(date);
 
-            String dia = ((cEsp.get(GregorianCalendar.DAY_OF_MONTH)+"").length()<2)?
-                    "0"+(cEsp.get(GregorianCalendar.DAY_OF_MONTH)):
-                    (cEsp.get(GregorianCalendar.DAY_OF_MONTH))+"";
-            String mes = (((cEsp.get(GregorianCalendar.MONTH)+1)+"").length()<2)?
-                    "0"+(cEsp.get(GregorianCalendar.MONTH)+1):
-                    (cEsp.get(GregorianCalendar.MONTH)+1)+"";
-            String año = ((cEsp.get(GregorianCalendar.YEAR)+"").length()<2)?
-                    "0"+(cEsp.get(GregorianCalendar.YEAR)):
-                    (cEsp.get(GregorianCalendar.YEAR))+"";
-            String fechaS = dia+ "-" + mes+"-" + año;
+            
+            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH)+ "-" + (cEsp.get(GregorianCalendar.MONTH)+1)+"-" 
+                    + cEsp.get(GregorianCalendar.YEAR);
 
             System.out.println("FEcha pedido "+fechaS);
             
@@ -610,7 +603,7 @@ public class Prodandes {
                     + "cantidadInventario "
                     + "from (Componente_Item inner join Componente on "
                     + "Componente.nombre=Componente_Item.componente)"
-                    + "WHERE Componente_Item.Estado ='Bodega' "
+                    + "WHERE Componente_Item.Estado ='En Bodega' "
                     + "GROUP BY Componente.nombre) where cantidadInventario>" + rango1
                     + " AND cantidadInventario<" + rango2;
             Statement st = con.createStatement();
@@ -621,7 +614,7 @@ public class Prodandes {
                 String componente = rs.getString("nombreComponente");
 
                 sql = "Select * from componente_item where componente='" + componente + "'"
-                        + "AND Estado ='Bodega'";
+                        + "AND Estado ='En Bodega'";
 
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
@@ -666,7 +659,7 @@ public class Prodandes {
                     JSONObject jO = new JSONObject();
                     jO.put("id", rs2.getInt("id"));
                     jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("componente", rs2.getString("componente"));
+                    jO.put("COMPONENTE", rs2.getString("COMPONENTE"));
                     jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
                 }
@@ -701,7 +694,7 @@ public class Prodandes {
                     JSONObject jO = new JSONObject();
                     jO.put("id", rs2.getInt("id"));
                     jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("componente", rs2.getString("componente"));
+                    jO.put("COMPONENTE", rs2.getString("COMPONENTE"));
                     jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
                 }
@@ -728,7 +721,7 @@ public class Prodandes {
                     JSONObject jO = new JSONObject();
                     jO.put("id", rs2.getInt("id"));
                     jO.put("ESTADO", rs2.getString("ESTADO"));
-                    jO.put("componente", rs2.getString("componente"));
+                    jO.put("COMPONENTE", rs2.getString("COMPONENTE"));
                     jO.put("ID_PEDIDO", rs2.getInt("ID_PEDIDO"));
                     jArray.add(jO);
 
@@ -774,7 +767,7 @@ public class Prodandes {
         System.out.println("Entrada parámetro cantidadProductoEnBodega");
         System.out.println(nombre);
 
-        String query = "select count(*) as cuenta from ITEM where NOMBRE_PRODUCTO='" + nombre + "' and ESTADO='Bodega'";
+        String query = "select count(*) as cuenta from ITEM where NOMBRE_PRODUCTO='" + nombre + "' and ESTADO='En Bodega'";
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(query);
         int resp = 0;
@@ -794,7 +787,7 @@ public class Prodandes {
         System.out.println(materia);
 
         String query = "select count(*) as cuenta from MATERIA_PRIMA_ITEM "
-                + "where MATERIA='" + materia + "' and ESTADO='Bodega'";
+                + "where MATERIA='" + materia + "' and ESTADO='En Bodega'";
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(query);
         int resp = 0;
@@ -814,7 +807,7 @@ public class Prodandes {
         System.out.println(componente);
 
         String query = "select count(*) as cuenta from COMPONENTE_ITEM "
-                + "where COMPONENTE='" + componente + "' and ESTADO='Bodega'";
+                + "where COMPONENTE='" + componente + "' and ESTADO='En Bodega'";
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(query);
         int resp = 0;
@@ -853,7 +846,7 @@ public class Prodandes {
      */
     public int reservarProductoBodega(String nombreProducto, int cantidad, int id_pedido) throws Exception {
 
-        String query = "select * from ITEM where NOMBRE_PRODUCTO='" + nombreProducto + "' and ESTADO='Bodega'";
+        String query = "select * from ITEM where NOMBRE_PRODUCTO='" + nombreProducto + "' and ESTADO='En Bodega'";
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(query);
 
@@ -877,7 +870,7 @@ public class Prodandes {
 
         System.out.println("reservarComponenteBodega " + cantidad_unidades);
         String query = "select * from COMPONENTE_ITEM where componente='" + id_componente
-                + "' and ESTADO='Bodega'";
+                + "' and ESTADO='En Bodega'";
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(query);
 
@@ -904,7 +897,7 @@ public class Prodandes {
         System.out.println("reservarComponenteBodega " + cantidad_unidades);
 
         String query = "select * from MATERIA_PRIMA_ITEM where materia='" + id_materia
-                + "' and ESTADO='Bodega'";
+                + "' and ESTADO='En Bodega'";
         Statement st = con.createStatement();
         ResultSet rs = st.executeQuery(query);
 

@@ -1,4 +1,4 @@
-<h2 class="form-title">Productos encontrados</h2>
+      <h2 class="form-title">Productos encontrados</h2>
 <div class="panel panel-default">
     <!-- Default panel contents -->
     <div class="panel-heading">Items</div>
@@ -15,7 +15,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="producto in consultarProductosCtrl.productos | orderBy: 'id'">
+        <tr ng-repeat="producto in consultarProductosCtrl.productos | orderBy: consultarProductosCtrl.order">
             <td>{{producto.id}}</td>
             <td>{{producto.ESTADO}}</td>
             <td>{{producto.NOMBRE_PRODUCTO}}</td>

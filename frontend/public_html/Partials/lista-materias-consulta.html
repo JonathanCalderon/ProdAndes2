@@ -14,7 +14,7 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="materia in consultarMateriasCtrl.materias | orderBy: 'id'">
+        <tr ng-repeat="materia in consultarMateriasCtrl.materias | orderBy: consultarMateriasCtrl.order">
             <td>{{materia.id}}</td>
             <td>{{materia.ESTADO}}</td>
             <td>{{materia.MATERIA}}</td>

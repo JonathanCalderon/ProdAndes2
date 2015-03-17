@@ -10,6 +10,10 @@ and open the template in the editor.
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="css/dashboard.css">
 </head>
 <body>
     <div>TODO write content</div>
@@ -21,43 +25,43 @@ and open the template in the editor.
             <navegacion></navegacion> 
         </div>
         
-        <div ng-if="toolbar.isSelected(1)">            
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(1)">            
             <registrar-pedido-form registarPedidoForm></registrar-pedido-form>            
         </div>
         
-        <div ng-if="toolbar.isSelected(2)">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(2)">
 
             <registrar-entrega-pedido-form registarPedidoForm></registrar-entrega-pedido-form>
             
         </div>
-        <div ng-if="toolbar.isSelected(3)" >      
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(3)" >      
             <toolbar-consulta-producto></toolbar-consulta-producto>
             <consultar-productos-form consultarProductosForm></consultar-productos-form>  
         </div>
-        <div ng-if="toolbar.isSelected(4)" >      
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(4)" >      
             <toolbar-consulta-suministros></toolbar-consulta-suministros>
             <consultar-materias-form consultarMateriasForm></consultar-materias-form>  
         </div>
-        <div ng-if="toolbar.isSelected(5)" >      
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(5)" >      
             <toolbar-consulta-suministros></toolbar-consulta-suministros>
             <consultar-componentes-form consultarComponentesForm></consultar-componentes-form>  
         </div>
-        <div ng-if="toolbar.isSelected(6)">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(6)">
 
             <registrar-proveedor-form registarProveedorForm></registrar-proveedor-form>
 
         </div>
-        <div ng-if="toolbar.isSelected(7)">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(7)">
 
             <registrar-llegada-material-form registrarLlegadaMaterialForm></registrar-llegada-material-form>
 
         </div>
-        <div ng-if="toolbar.isSelected(8)">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(8)">
 
             <registrar-llegada-componente-form registrarLlegadaComponenteForm></registrar-llegada-componente-form>
 
         </div>
-        <div ng-if="toolbar.isSelected(9)">
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main" ng-if="toolbar.isSelected(9)">
 
             <registrar-ejecucion-etapa-form registrarEjecucionEtapaForm></registrar-ejecucion-etapa-form>
             
@@ -66,5 +70,12 @@ and open the template in the editor.
 </div>
 <script type="text/javascript" src="js/angular.min.js"></script>
 <script type="text/javascript" src="js/AngularControllers/app.js"></script>
+<script type="text/javascript" src="js/bootstrap.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/docs.min.js"></script>
+<script type="text/javascript" src="js/npm.js"></script>
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+
 </body>
 </html>

@@ -14,10 +14,10 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-repeat="componentes in consultarComponentesCtrl.componentes | orderBy: 'id'">
+        <tr ng-repeat="componentes in consultarComponentesCtrl.componentes | orderBy: consultarComponentesCtrl.order">
             <td>{{componentes.id}}</td>
             <td>{{componentes.ESTADO}}</td>
-            <td>{{componentes.componente}}</td>
+            <td>{{componentes.COMPONENTE}}</td>
             <td>{{componentes.ID_PEDIDO}}</td>
         </tr>
         </tbody>
