@@ -43,382 +43,412 @@
             controller: ['$http',function($http){
                 var self=this;
                 self.pedido={};
+                self.id_pedido=null;
+
+                this.hayIdPedido=function(){
+                    return this.id_pedido!==null;
+                };
+
                 this.addPedido=function(pedidoParam){
 
-                	self.pedido = pedidoParam,
-                	console.log('Form pedido '+JSON.stringify(self.pedido));
+                    self.id_pedido=null;
+                    self.pedido = pedidoParam,
+                    console.log('Form pedido '+JSON.stringify(self.pedido));
                     $http.post('http://localhost:8080/backend/Servicios/registrarPedido'
                     	, self.pedido).success(function(data){
-                         alert("Respuesta "+data.Respuesta);
-                         self.pedido={};
-                     });
+
+                            console.log('Data '+JSON.stringify(data));
+                            alert("Respuesta "+data.Respuesta);
+                            self.id_pedido=data.id_pedido;
+                            console.log('Id pedido '+self.id_pedido);
+                            self.pedido={};
+                        });
                     };
-                }],
-                controllerAs:'registrarPedidoCtrl'
+
+                    this.cancelPedido=function(){
+
+                        self.pedido = {};
+                        self.pedido.id_pedido = self.id_pedido;
+                        console.log('Form pedido cancelar '+JSON.stringify(self.pedido));
+                        $http.post('http://localhost:8080/backend/Servicios/cancelarPedido'
+                            , self.pedido).success(function(data){
+
+                                console.log('Data '+JSON.stringify(data));
+                                alert("Respuesta se ha cancelado su pedido");
+
+                            });
+                        };
+
+
+
+                    }],
+                    controllerAs:'registrarPedidoCtrl'
+                };
+            });
+
+
+
+prodAndes.directive('registrarEntregaPedidoForm', function(){
+    return{
+        restrict:'E',
+        templateUrl:'partials/registrar-entrega-pedido-form.html',
+        controller: ['$http',function($http){
+            var self=this;
+            self.pedido={};
+            this.addPedido=function(pedidoParam){
+
+             self.pedido = pedidoParam,
+             console.log('Form pedido '+JSON.stringify(self.pedido));
+             $http.post('http://localhost:8080/backend/Servicios/registrarEntregaPedidoProductosCliente'
+                 , self.pedido).success(function(data){
+                     alert("Respuesta se ha registrado la entrega del pedido");
+                     self.pedido={};
+                 });
+             };
+         }],
+         controllerAs:'registrarEntregaPedidoCtrl'
+     };
+ });
+
+prodAndes.directive('toolbarConsultaProducto', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/toolbar-consulta-producto.html',
+        controller:function(){
+            this.tab=0;
+            this.selectTab=function(setTab){
+                this.tab=setTab;
             };
-        });
-
-    prodAndes.directive('registrarEntregaPedidoForm', function(){
-        return{
-            restrict:'E',
-            templateUrl:'partials/registrar-entrega-pedido-form.html',
-            controller: ['$http',function($http){
-                var self=this;
-                self.pedido={};
-                this.addPedido=function(pedidoParam){
-
-                	self.pedido = pedidoParam,
-                	console.log('Form pedido '+JSON.stringify(self.pedido));
-                    $http.post('http://localhost:8080/backend/Servicios/registrarEntregaPedidoProductosCliente'
-                    	, self.pedido).success(function(data){
-                         alert("Respuesta se ha registrado la entrega del pedido");
-                         self.pedido={};
-                     });
-                    };
-                }],
-                controllerAs:'registrarEntregaPedidoCtrl'
+            this.isSelected=function(tabParam){
+                return this.tab===tabParam;
             };
-        });
+        },
+        controllerAs:'toolbarConsultaProductoCtrl'
+    };
+});
 
-    prodAndes.directive('toolbarConsultaProducto', function(){
-        return{
-            restrict:'E',
-            templateUrl: 'partials/toolbar-consulta-producto.html',
-            controller:function(){
-                this.tab=0;
-                this.selectTab=function(setTab){
-                    this.tab=setTab;
-                };
-                this.isSelected=function(tabParam){
-                    return this.tab===tabParam;
-                };
-            },
-            controllerAs:'toolbarConsultaProductoCtrl'
-        };
-    });
+prodAndes.directive('toolbarConsultaSuministros', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/toolbar-consulta-suministros.html',
+        controller:function(){
+            this.tab=0;
+            this.selectTab=function(setTab){
+                this.tab=setTab;
+            };
+            this.isSelected=function(tabParam){
+                return this.tab===tabParam;
+            };
+        },
+        controllerAs:'toolbarConsultaSuministrosCtrl'
+    };
+});
 
-    prodAndes.directive('toolbarConsultaSuministros', function(){
-        return{
-            restrict:'E',
-            templateUrl: 'partials/toolbar-consulta-suministros.html',
-            controller:function(){
-                this.tab=0;
-                this.selectTab=function(setTab){
-                    this.tab=setTab;
-                };
-                this.isSelected=function(tabParam){
-                    return this.tab===tabParam;
-                };
-            },
-            controllerAs:'toolbarConsultaSuministrosCtrl'
-        };
-    });
-
-    prodAndes.directive('consultarProductosForm', function(){
-        return{
-            restrict:'E',
-            templateUrl: 'partials/consultar-productos-form.html',
-            controller: ['$http',function($http){
-                var self = this;
+prodAndes.directive('consultarProductosForm', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/consultar-productos-form.html',
+        controller: ['$http',function($http){
+            var self = this;
 
 
-                self.order='';
-                self.consulta = {};
+            self.order='';
+            self.consulta = {};
+            self.productos = [];
+
+            this.isFull=function(){
+                return self.productos.length>0;
+            };
+
+            this.darOrder = function(){
+
+                console.log('Dar order '+JSON.stringify(self.consulta.order));
+                return self.consulta.order;
+            }
+
+            this.enviarConsulta=function(consultaParam,criterio){
+
                 self.productos = [];
-
-                this.isFull=function(){
-                    return self.productos.length>0;
-                };
-
-                this.darOrder = function(){
-
-                    console.log('Dar order '+JSON.stringify(self.consulta.order));
-                    return self.consulta.order;
-                }
-
-                this.enviarConsulta=function(consultaParam,criterio){
-
-                    self.productos = [];
-                    self.order='';
-
-                    console.log("Criterio "+criterio)
-                    self.consulta = consultaParam,
-                    self.consulta.Criterio = criterio;
-                    self.order=self.consulta.order;
-
-                    console.log('Form consulta '+JSON.stringify(self.consulta));
-                    $http.post('http://localhost:8080/backend/Servicios/consultarProductos' , self.consulta).success(function(data){
-
-                        console.log("Consultar productos "+JSON.stringify(data));
-                        self.productos=data;
-                        console.log("Consultar productos 2"+JSON.stringify(self.productos));
-                        self.consulta={};
-                    });
-
-
-                };
-            }],
-            controllerAs:'consultarProductosCtrl'
-        };
-    });
-
-    prodAndes.directive('listaProductosConsulta', function(){
-        return{
-            restrict:'E',
-            templateUrl: 'partials/lista-productos-consulta.html',
-            controller:function(){
-
-            },
-            controllerAs:'listaProductosConsulta'
-        };
-    });
-
-
-    prodAndes.directive('consultarMateriasForm', function(){
-        return{
-            restrict:'E',
-            templateUrl: 'partials/consultar-materias-form.html',
-            controller: ['$http',function($http){
-                var self = this;
-
                 self.order='';
-                self.consulta = {};
+
+                console.log("Criterio "+criterio)
+                self.consulta = consultaParam,
+                self.consulta.Criterio = criterio;
+                self.order=self.consulta.order;
+
+                console.log('Form consulta '+JSON.stringify(self.consulta));
+                $http.post('http://localhost:8080/backend/Servicios/consultarProductos' , self.consulta).success(function(data){
+
+                    console.log("Consultar productos "+JSON.stringify(data));
+                    self.productos=data;
+                    console.log("Consultar productos 2"+JSON.stringify(self.productos));
+                    self.consulta={};
+                });
+
+
+            };
+        }],
+        controllerAs:'consultarProductosCtrl'
+    };
+});
+
+prodAndes.directive('listaProductosConsulta', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/lista-productos-consulta.html',
+        controller:function(){
+
+        },
+        controllerAs:'listaProductosConsulta'
+    };
+});
+
+
+prodAndes.directive('consultarMateriasForm', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/consultar-materias-form.html',
+        controller: ['$http',function($http){
+            var self = this;
+
+            self.order='';
+            self.consulta = {};
+            self.materias = [];
+
+            this.isFull=function(){
+                return self.materias.length>0;
+            };
+
+
+            this.enviarConsulta=function(consultaParam,criterio){
+
                 self.materias = [];
+                self.order = '';
+                console.log("Criterio MAterias "+criterio)
+                self.consulta = consultaParam,
+                self.consulta.Criterio = criterio;
+                self.order = self.consulta.order;
+                console.log('Form consulta materias '+JSON.stringify(self.consulta));
+                $http.post('http://localhost:8080/backend/Servicios/consultarMateriasPrimas', self.consulta).success(function(data){
 
-                this.isFull=function(){
-                    return self.materias.length>0;
-                };
-
-
-                this.enviarConsulta=function(consultaParam,criterio){
-
-                    self.materias = [];
-                    self.order = '';
-                    console.log("Criterio MAterias "+criterio)
-                    self.consulta = consultaParam,
-                    self.consulta.Criterio = criterio;
-                    self.order = self.consulta.order;
-                    console.log('Form consulta materias '+JSON.stringify(self.consulta));
-                    $http.post('http://localhost:8080/backend/Servicios/consultarMateriasPrimas', self.consulta).success(function(data){
-
-                        console.log("Consultar materias "+JSON.stringify(data));
-                        self.materias=data;
-                        console.log("Consultar materias 2"+JSON.stringify(self.materias));
-                        self.consulta={};
-                    });
+                    console.log("Consultar materias "+JSON.stringify(data));
+                    self.materias=data;
+                    console.log("Consultar materias 2"+JSON.stringify(self.materias));
+                    self.consulta={};
+                });
 
 
-                };
-            }],
-            controllerAs:'consultarMateriasCtrl'
-        };
-    });
+            };
+        }],
+        controllerAs:'consultarMateriasCtrl'
+    };
+});
 
-    prodAndes.directive('listaMateriasConsulta', function(){
-        return{
-            restrict:'E',
-            templateUrl: 'partials/lista-materias-consulta.html',
-            controller:function(){
+prodAndes.directive('listaMateriasConsulta', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/lista-materias-consulta.html',
+        controller:function(){
 
-            },
-            controllerAs:'listaMateriasConsulta'
-        };
-    });
+        },
+        controllerAs:'listaMateriasConsulta'
+    };
+});
 
-    prodAndes.directive('consultarComponentesForm', function(){
-        return{
-            restrict:'E',
-            templateUrl: 'partials/consultar-componentes-form.html',
-            controller: ['$http',function($http){
-                var self = this;
+prodAndes.directive('consultarComponentesForm', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/consultar-componentes-form.html',
+        controller: ['$http',function($http){
+            var self = this;
 
-                self.order='';
-                self.consulta = {};
+            self.order='';
+            self.consulta = {};
+            self.componentes = [];
+
+            this.isFull=function(){
+                return self.componentes.length>0;
+            };
+
+
+            this.enviarConsulta=function(consultaParam,criterio){
+
                 self.componentes = [];
+                self.order='';
+                console.log("Criterio "+criterio)
+                self.consulta = consultaParam,
+                self.consulta.Criterio = criterio;
+                self.order= self.consulta.order;
+                console.log('Form consulta '+JSON.stringify(self.consulta));
+                $http.post('http://localhost:8080/backend/Servicios/consultarComponentes', self.consulta).success(function(data){
 
-                this.isFull=function(){
-                    return self.componentes.length>0;
-                };
-
-
-                this.enviarConsulta=function(consultaParam,criterio){
-
-                    self.componentes = [];
-                    self.order='';
-                    console.log("Criterio "+criterio)
-                    self.consulta = consultaParam,
-                    self.consulta.Criterio = criterio;
-                    self.order= self.consulta.order;
-                    console.log('Form consulta '+JSON.stringify(self.consulta));
-                    $http.post('http://localhost:8080/backend/Servicios/consultarComponentes', self.consulta).success(function(data){
-
-                        console.log("Consultar Componentes "+JSON.stringify(data));
-                        self.componentes=data;
-                        console.log("Consultar Componentes 2"+JSON.stringify(self.componentes));
-                        self.consulta={};
-                    });
+                    console.log("Consultar Componentes "+JSON.stringify(data));
+                    self.componentes=data;
+                    console.log("Consultar Componentes 2"+JSON.stringify(self.componentes));
+                    self.consulta={};
+                });
 
 
-                };
-            }],
-            controllerAs:'consultarComponentesCtrl'
-        };
-    });
+            };
+        }],
+        controllerAs:'consultarComponentesCtrl'
+    };
+});
 
-    prodAndes.directive('listaComponentesConsulta', function(){
-        return{
-            restrict:'E',
-            templateUrl: 'partials/lista-componentes-consulta.html',
-            controller:function(){
+prodAndes.directive('listaComponentesConsulta', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/lista-componentes-consulta.html',
+        controller:function(){
 
-            },
-            controllerAs:'listaComponentesConsulta'
-        };
-    });
-    prodAndes.directive('registrarProveedorForm', function(){
-        return{
-            restrict:'E',
-            templateUrl:'partials/registrar-proveedor-form.html',
-            controller: ['$http',function($http){
-                var self=this;
-                self.proveedor={};
-                this.addProveedor=function(proveedorParam){
+        },
+        controllerAs:'listaComponentesConsulta'
+    };
+});
+prodAndes.directive('registrarProveedorForm', function(){
+    return{
+        restrict:'E',
+        templateUrl:'partials/registrar-proveedor-form.html',
+        controller: ['$http',function($http){
+            var self=this;
+            self.proveedor={};
+            this.addProveedor=function(proveedorParam){
 
-                	self.proveedor = proveedorParam,
-                	console.log('Que es esto '+JSON.stringify(proveedorParam));console.log('Form pedido '+JSON.stringify(self.proveedor));
-                    $http.post('http://localhost:8080/backend/Servicios/registrarProveedor'
-                    	, self.proveedor).success(function(data){
-                    	alert("Respuesta "+data.Respuesta);
-                        self.proveedor={};
-                    });
-                };
-            }],
-            controllerAs:'registrarProveedorCtrl'
-        };
-    });
-    
-    prodAndes.directive('registrarLlegadaMaterialForm', function(){
-        return{
-            restrict:'E',
-            templateUrl:'partials/registrar-llegada-material-form.html',
-            controller: ['$http',function($http){
-                var self=this;
-                self.llegada={};
-                this.addLlegadaMaterial=function(llegadaParam){
+             self.proveedor = proveedorParam,
+             console.log('Que es esto '+JSON.stringify(proveedorParam));console.log('Form pedido '+JSON.stringify(self.proveedor));
+             $http.post('http://localhost:8080/backend/Servicios/registrarProveedor'
+                 , self.proveedor).success(function(data){
+                     alert("Respuesta "+data.Respuesta);
+                     self.proveedor={};
+                 });
+             };
+         }],
+         controllerAs:'registrarProveedorCtrl'
+     };
+ });
 
-                	self.llegada = llegadaParam,
-                	console.log('Que es esto '+JSON.stringify(llegadaParam));console.log('Form pedido '+JSON.stringify(self.llegada));
-                    $http.post('http://localhost:8080/backend/Servicios/registrarLlegadaDeMaterial'
-                    	, self.llegada).success(function(data){
-                    	alert("Respuesta "+data.Respuesta);
-                        self.llegada={};
-                    });
-                };
-            }],
-            controllerAs:'registrarLlegadaMaterialCtrl'
-        };
-    });
-    
-    prodAndes.directive('registrarLlegadaComponenteForm', function(){
-        return{
-            restrict:'E',
-            templateUrl:'partials/registrar-llegada-componente-form.html',
-            controller: ['$http',function($http){
-                var self=this;
-                self.llegada={};
-                this.addLlegadaComponente=function(llegadaParam){
+prodAndes.directive('registrarLlegadaMaterialForm', function(){
+    return{
+        restrict:'E',
+        templateUrl:'partials/registrar-llegada-material-form.html',
+        controller: ['$http',function($http){
+            var self=this;
+            self.llegada={};
+            this.addLlegadaMaterial=function(llegadaParam){
 
-                	self.llegada = llegadaParam,
-                	console.log('Que es esto '+JSON.stringify(llegadaParam));console.log('Form pedido '+JSON.stringify(self.llegada));
-                    $http.post('http://localhost:8080/backend/Servicios/registrarLlegadaDeComponentes'
-                    	, self.llegada).success(function(data){
-                    	alert("Respuesta "+data.Respuesta);
-                        self.llegada={};
-                    });
-                };
-            }],
-            controllerAs:'registrarLlegadaComponenteCtrl'
-        };
-    });
-    
-    prodAndes.directive('registrarEjecucionEtapaForm', function(){
-        return{
-            restrict:'E',
-            templateUrl:'partials/registrar-ejecucion-etapa-form.html',
-            controller: ['$http',function($http){
-                var self=this;
-                self.ejecucionEtapa={};
-                this.addEjecucionEtapa=function(EjecucionEtapaP){
+             self.llegada = llegadaParam,
+             console.log('Que es esto '+JSON.stringify(llegadaParam));console.log('Form pedido '+JSON.stringify(self.llegada));
+             $http.post('http://localhost:8080/backend/Servicios/registrarLlegadaDeMaterial'
+                 , self.llegada).success(function(data){
+                     alert("Respuesta "+data.Respuesta);
+                     self.llegada={};
+                 });
+             };
+         }],
+         controllerAs:'registrarLlegadaMaterialCtrl'
+     };
+ });
 
-                	self.ejecucionEtapa = EjecucionEtapaP,
-                	console.log('Form pedido '+JSON.stringify(self.ejecucionEtapa));
-                    $http.post('http://localhost:8080/backend/Servicios/registrarEjecucionEtapa'
-                    	, self.ejecucionEtapa).success(function(data){
-                    	alert("Respuesta "+data.Respuesta);
-                        self.ejecucionEtapa={};
-                    });
-                };
-            }],
-            controllerAs:'registrarEjecucionEtapaCtrl'
-        };
-    });
+prodAndes.directive('registrarLlegadaComponenteForm', function(){
+    return{
+        restrict:'E',
+        templateUrl:'partials/registrar-llegada-componente-form.html',
+        controller: ['$http',function($http){
+            var self=this;
+            self.llegada={};
+            this.addLlegadaComponente=function(llegadaParam){
 
-    prodAndes.directive('etapaMayorMovimientoForm', function(){
+             self.llegada = llegadaParam,
+             console.log('Que es esto '+JSON.stringify(llegadaParam));console.log('Form pedido '+JSON.stringify(self.llegada));
+             $http.post('http://localhost:8080/backend/Servicios/registrarLlegadaDeComponentes'
+                 , self.llegada).success(function(data){
+                     alert("Respuesta "+data.Respuesta);
+                     self.llegada={};
+                 });
+             };
+         }],
+         controllerAs:'registrarLlegadaComponenteCtrl'
+     };
+ });
 
-        return{
-            restrict:'E',
-            templateUrl: 'partials/etapa-mayor-movimiento-form.html',
-            controller: ['$http',function($http){
-                var self = this;
-                
-                self.consulta = {};   
+prodAndes.directive('registrarEjecucionEtapaForm', function(){
+    return{
+        restrict:'E',
+        templateUrl:'partials/registrar-ejecucion-etapa-form.html',
+        controller: ['$http',function($http){
+            var self=this;
+            self.ejecucionEtapa={};
+            this.addEjecucionEtapa=function(EjecucionEtapaP){
 
-                this.enviarConsulta=function(consultaParam){
+             self.ejecucionEtapa = EjecucionEtapaP,
+             console.log('Form pedido '+JSON.stringify(self.ejecucionEtapa));
+             $http.post('http://localhost:8080/backend/Servicios/registrarEjecucionEtapa'
+                 , self.ejecucionEtapa).success(function(data){
+                     alert("Respuesta "+data.Respuesta);
+                     self.ejecucionEtapa={};
+                 });
+             };
+         }],
+         controllerAs:'registrarEjecucionEtapaCtrl'
+     };
+ });
 
-                    
-                    self.consulta = consultaParam,
-                    console.log('Form consulta '+JSON.stringify(self.consulta));
-                    $http.post('http://localhost:8080/backend/Servicios/consultarEtapaProduccionMayorMovimiento', self.consulta).success(function(data){
+prodAndes.directive('etapaMayorMovimientoForm', function(){
 
-                        console.log("Etapa mayor movimiento"+JSON.stringify(data));
-                        alert("La etapa más activa es: "+data.CODIGO_SECUENCIA+" con "+data.CUENTA+" ejecuciones.");
-                        self.consulta={};
-                    });
+    return{
+        restrict:'E',
+        templateUrl: 'partials/etapa-mayor-movimiento-form.html',
+        controller: ['$http',function($http){
+            var self = this;
+
+            self.consulta = {};   
+
+            this.enviarConsulta=function(consultaParam){
 
 
-                };
-            }],
-            controllerAs:'etapaMayorMovimientoCtrl'
-        };
-    });
-    
-    prodAndes.directive('operarioMasActivoForm', function(){
+                self.consulta = consultaParam,
+                console.log('Form consulta '+JSON.stringify(self.consulta));
+                $http.post('http://localhost:8080/backend/Servicios/consultarEtapaProduccionMayorMovimiento', self.consulta).success(function(data){
 
-        return{
-            restrict:'E',
-            templateUrl: 'partials/operario-mas-activo-form.html',
-            controller: ['$http',function($http){
-                var self = this;
-                
-                self.consulta = {};   
-
-                this.enviarConsulta=function(consultaParam){
-
-                    
-                    self.consulta = consultaParam,
-                    console.log('Form consulta '+JSON.stringify(self.consulta));
-                    $http.post('http://localhost:8080/backend/Servicios/operarioMasActivo', self.consulta).success(function(data){
-
-                        console.log("Operario mas activo en etapa:"+JSON.stringify(data));
-                        alert(JSON.stringify(data));
-                        self.consulta={};
-                    });
+                    console.log("Etapa mayor movimiento"+JSON.stringify(data));
+                    alert("La etapa más activa es: "+data.CODIGO_SECUENCIA+" con "+data.CUENTA+" ejecuciones.");
+                    self.consulta={};
+                });
 
 
-                };
-            }],
-            controllerAs:'operarioMasActivoCtrl'
-        };
-    });
+            };
+        }],
+        controllerAs:'etapaMayorMovimientoCtrl'
+    };
+});
+
+prodAndes.directive('operarioMasActivoForm', function(){
+
+    return{
+        restrict:'E',
+        templateUrl: 'partials/operario-mas-activo-form.html',
+        controller: ['$http',function($http){
+            var self = this;
+
+            self.consulta = {};   
+
+            this.enviarConsulta=function(consultaParam){
+
+
+                self.consulta = consultaParam,
+                console.log('Form consulta '+JSON.stringify(self.consulta));
+                $http.post('http://localhost:8080/backend/Servicios/operarioMasActivo', self.consulta).success(function(data){
+
+                    console.log("Operario mas activo en etapa:"+JSON.stringify(data));
+                    alert(JSON.stringify(data));
+                    self.consulta={};
+                });
+
+
+            };
+        }],
+        controllerAs:'operarioMasActivoCtrl'
+    };
+});
 })();
 

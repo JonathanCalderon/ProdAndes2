@@ -9,17 +9,17 @@ and open the template in the editor.
     <form name="consultarProductosForm" ng-submit="consultarProductosForm.$valid && consultarProductosCtrl.enviarConsulta(this.consultarProductosCtrl.consulta
     ,'Rango')" validate>
     <h2 class="form-title">Consultar Productos Por Rango de Existencias</h2>
-    <div class="row" style="margin-top:50px">
+    <div class="row" >
 
-        <div class="col-md-6">
+        <div class="col-md-4">
             <label>Rango 1:</label>
             <input ng-model="this.consultarProductosCtrl.consulta.Rango1" type="number" class="form-control" required/>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <label>Rango 2:</label>
             <input ng-model="this.consultarProductosCtrl.consulta.Rango2" type="number" class="form-control" required/>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <label>Orden:</label>
             <input ng-model="this.consultarProductosCtrl.consulta.order" type="text" class="form-control" required/>
         </div>
