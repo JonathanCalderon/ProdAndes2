@@ -75,6 +75,9 @@ public class Prodandes {
             Calendar c = new GregorianCalendar();
             String fechaSolicitud = c.get(GregorianCalendar.DAY_OF_MONTH) + "-"
                     + (c.get(GregorianCalendar.MONTH) + 1) + "-" + c.get(GregorianCalendar.YEAR);
+            
+            String fechaEntrega = c.get(GregorianCalendar.DAY_OF_MONTH) + "-"
+                    + (c.get(GregorianCalendar.MONTH) + 2) + "-" + c.get(GregorianCalendar.YEAR);
 
             System.out.println("FEcha actual " + fechaSolicitud);
             String sql = "select max (id) as MAXIMO from PEDIDO_PRODUCTO";
@@ -226,7 +229,7 @@ public class Prodandes {
 
                         //Falta fecha esperada
                         crearItemsReservadosPedido(nombreProducto, id_pedido, cantidad);
-                        resp = "Se registro su pedido, la fecha esperada de entrega es ";
+                        resp = "Se registro su pedido, la fecha esperada de entrega es "+fechaEntrega;
                     } else {
                         //Poner el pedido en estad ESPERA
                         st3 = con.createStatement();

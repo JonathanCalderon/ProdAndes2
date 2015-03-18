@@ -58,7 +58,7 @@
                     	, self.pedido).success(function(data){
 
                             console.log('Data '+JSON.stringify(data));
-                            alert("Respuesta "+data.Respuesta);
+                            alert(""+data.Respuesta);
                             self.id_pedido=data.id_pedido;
                             console.log('Id pedido '+self.id_pedido);
                             self.pedido={};
@@ -74,7 +74,7 @@
                             , self.pedido).success(function(data){
 
                                 console.log('Data '+JSON.stringify(data));
-                                alert("Respuesta se ha cancelado su pedido");
+                                alert("Se ha cancelado su pedido");
 
                             });
                         };
@@ -101,7 +101,7 @@ prodAndes.directive('registrarEntregaPedidoForm', function(){
              console.log('Form pedido '+JSON.stringify(self.pedido));
              $http.post('http://localhost:8080/backend/Servicios/registrarEntregaPedidoProductosCliente'
                  , self.pedido).success(function(data){
-                     alert("Respuesta se ha registrado la entrega del pedido");
+                     alert("Se ha registrado la entrega del pedido");
                      self.pedido={};
                  });
              };
