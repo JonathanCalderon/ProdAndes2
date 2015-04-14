@@ -10,6 +10,7 @@ import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -18,6 +19,8 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -75,7 +78,7 @@ public class Prodandes {
             Calendar c = new GregorianCalendar();
             String fechaSolicitud = c.get(GregorianCalendar.DAY_OF_MONTH) + "-"
                     + (c.get(GregorianCalendar.MONTH) + 1) + "-" + c.get(GregorianCalendar.YEAR);
-            
+
             String fechaEntrega = c.get(GregorianCalendar.DAY_OF_MONTH) + "-"
                     + (c.get(GregorianCalendar.MONTH) + 2) + "-" + c.get(GregorianCalendar.YEAR);
 
@@ -229,7 +232,7 @@ public class Prodandes {
 
                         //Falta fecha esperada
                         crearItemsReservadosPedido(nombreProducto, id_pedido, cantidad);
-                        resp = "Se registro su pedido, la fecha esperada de entrega es "+fechaEntrega;
+                        resp = "Se registro su pedido, la fecha esperada de entrega es " + fechaEntrega;
                     } else {
                         //Poner el pedido en estad ESPERA
                         st3 = con.createStatement();
@@ -252,7 +255,7 @@ public class Prodandes {
             return jRespuesta;
         } catch (Exception e) {
             e.printStackTrace();
-            cerrarConexion();
+            rollback();
             //return "error";
             JSONObject jRespuesta = new JSONObject();
             jRespuesta.put("Respuesta", "error");
@@ -291,14 +294,14 @@ public class Prodandes {
             st.close();
 
             sql = "update ITEM set ESTADO='En Bodega',ID_PEDIDO=null WHERE ID_PEDIDO=" + id_pedido
-                    +" AND ESTADO='Reservado'";
+                    + " AND ESTADO='Reservado'";
             st = con.createStatement();
             System.out.println("------------------QUERY----------------------------");
             System.out.println(sql);
             st.executeUpdate(sql);
             st.close();
-            
-            sql = "delete from ITEM WHERE ID_PEDIDO=" + id_pedido+ "AND ESTADO='Pre Produccion'";
+
+            sql = "delete from ITEM WHERE ID_PEDIDO=" + id_pedido + "AND ESTADO='Pre Produccion'";
             st = con.createStatement();
             System.out.println("------------------QUERY----------------------------");
             System.out.println(sql);
@@ -353,8 +356,9 @@ public class Prodandes {
         st.close();
 
         if (cantidadProductosProducidos < cantidad) {
-
+            rollback();
             throw new Exception("No se han terminado de producir todos los productos");
+
         } else {
             st = con.createStatement();
             rs = st.executeQuery(query);
@@ -918,13 +922,26 @@ public class Prodandes {
         con = null;
         Class.forName("oracle.jdbc.driver.OracleDriver");
         con = DriverManager.getConnection("jdbc:oracle:thin:@157.253.238.224:1531:prod", "ISIS2304271510", "rproxyquark");
-
+        con.setAutoCommit(false);
     }
 
     public void cerrarConexion() throws Exception {
         if (con != null) {
+            con.commit();
             con.close();
             con = null;
+        }
+    }
+
+    public void rollback() {
+        if (con != null) {
+            try {
+                con.rollback();
+                con.close();
+                con = null;
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
         }
     }
 
@@ -1393,4 +1410,47 @@ public class Prodandes {
         System.out.println("Respuesta: " + resp.toString());
         return resp;
     }
+
+    //---------------------------------------------------------------------------------------------------------------
+    //------------------------ Iteracion 3---------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------------------------
+    /**
+    @POST
+    @Path("/consultarPedidos")
+    public JSONArray consultarPedidos(JSONObject jP) throws Exception {
+
+        JSONArray jArray = new JSONArray();
+        abrirConexion();
+
+
+        String sql = "Select * from Pedido";
+        Statement st = con.createStatement();
+        ResultSet rs = st.executeQuery(sql);
+
+        while (rs.next()) {
+
+            String nomProd = rs.getString("nombreProducto");
+
+            sql = "Select * from ITEM where nombre_producto='" + nomProd + "' AND ESTADO='En Bodega'";
+
+            Statement st2 = con.createStatement();
+            ResultSet rs2 = st2.executeQuery(sql);
+
+            while (rs2.next()) {
+                JSONObject jObject = new JSONObject();
+                jObject.put("Id", rs2.getInt("id"));
+                jObject.put("Estado", rs2.getString("ESTADO"));
+                jObject.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
+                jObject.put("Etapa", rs2.getInt("ETAPA"));
+                jObject.put("IdPedido", rs2.getInt("ID_PEDIDO"));
+                jArray.add(jObject);
+            }
+
+            st2.close();
+        }
+        st.close();
+
+    }
+    **/
+
 }
