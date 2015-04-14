@@ -1414,7 +1414,6 @@ public class Prodandes {
     //---------------------------------------------------------------------------------------------------------------
     //------------------------ Iteracion 3---------------------------------------------------------------------------
     //---------------------------------------------------------------------------------------------------------------
-    /**
     @POST
     @Path("/consultarPedidos")
     public JSONArray consultarPedidos(JSONObject jP) throws Exception {
@@ -1422,35 +1421,170 @@ public class Prodandes {
         JSONArray jArray = new JSONArray();
         abrirConexion();
 
+        String criterio = jP.get("Criterio").toString();
+        if (criterio.equalsIgnoreCase("Cantidad")) {
 
-        String sql = "Select * from Pedido";
-        Statement st = con.createStatement();
-        ResultSet rs = st.executeQuery(sql);
+            int rango1 = (int) jP.get("Rango1");
+            int rango2 = (int) jP.get("Rango2");
 
-        while (rs.next()) {
+            String sql = "select * from PEDIDO_PRODUCTO where CANTIDAD_PRODUCTO >=" + rango1 + " AND CANTIDAD_PRODUCTO <= " + rango2;
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
 
-            String nomProd = rs.getString("nombreProducto");
+            while (rs.next()) {
 
-            sql = "Select * from ITEM where nombre_producto='" + nomProd + "' AND ESTADO='En Bodega'";
-
-            Statement st2 = con.createStatement();
-            ResultSet rs2 = st2.executeQuery(sql);
-
-            while (rs2.next()) {
                 JSONObject jObject = new JSONObject();
-                jObject.put("Id", rs2.getInt("id"));
-                jObject.put("Estado", rs2.getString("ESTADO"));
-                jObject.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
-                jObject.put("Etapa", rs2.getInt("ETAPA"));
-                jObject.put("IdPedido", rs2.getInt("ID_PEDIDO"));
+                jObject.put("id", rs.getInt("id"));
+                jObject.put("estado", rs.getString("ESTADO"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("id_cliente", rs.getInt("id_cliente"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        } else if (criterio.equalsIgnoreCase("Estado")) {
+
+            String estado = jP.get("Estado").toString();
+
+            String sql = "select * from PEDIDO_PRODUCTO where ESTADO = '" + estado+"'";
+            Statement st2 = con.createStatement();
+            ResultSet rs = st2.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("id", rs.getInt("id"));
+                jObject.put("estado", rs.getString("ESTADO"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("id_cliente", rs.getInt("id_cliente"));
                 jArray.add(jObject);
             }
 
             st2.close();
+
+        } else if (criterio.equalsIgnoreCase("Fecha Solicitud")) {
+
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            java.util.Date date = format.parse(jP.get("fecha_solicitud").toString().substring(0, 10));
+            System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
+            Calendar cEsp = new GregorianCalendar();
+            cEsp.setTime(date);
+
+            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                    + "-" + cEsp.get(GregorianCalendar.YEAR);
+
+            System.out.println("Fecha " + fechaS);
+            String sql = "select * from PEDIDO_PRODUCTO where fecha_solicitud = "
+                    + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("id", rs.getInt("id"));
+                jObject.put("estado", rs.getString("ESTADO"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("id_cliente", rs.getInt("id_cliente"));
+                jArray.add(jObject);
+
+            }
+
+            st.close();
+        } else if (criterio.equalsIgnoreCase("Fecha Entrega")) {
+
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            java.util.Date date = format.parse(jP.get("fecha_entrega").toString().substring(0, 10));
+            System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
+            Calendar cEsp = new GregorianCalendar();
+            cEsp.setTime(date);
+
+            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                    + "-" + cEsp.get(GregorianCalendar.YEAR);
+
+            System.out.println("Fecha " + fechaS);
+            String sql = "select * from PEDIDO_PRODUCTO where fecha_entrega = "
+                    + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("id", rs.getInt("id"));
+                jObject.put("estado", rs.getString("ESTADO"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("id_cliente", rs.getInt("id_cliente"));
+                jArray.add(jObject);
+
+            }
+
+            st.close();
+        } else if (criterio.equalsIgnoreCase("Fecha Esperada Entrega")) {
+
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+            java.util.Date date = format.parse(jP.get("fecha_esperada_entrega").toString().substring(0, 10));
+            System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
+            Calendar cEsp = new GregorianCalendar();
+            cEsp.setTime(date);
+
+            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                    + "-" + cEsp.get(GregorianCalendar.YEAR);
+
+            System.out.println("Fecha " + fechaS);
+            String sql = "select * from PEDIDO_PRODUCTO where fecha_esperada_entrega = "
+                    + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("id", rs.getInt("id"));
+                jObject.put("estado", rs.getString("ESTADO"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("id_cliente", rs.getInt("id_cliente"));
+                jArray.add(jObject);
+
+            }
+
+            st.close();
+        } else if (criterio.equalsIgnoreCase("Id Cliente")) {
+
+            int id_cliente = (int) jP.get("id_cliente");
+
+            String sql = "select * from PEDIDO_PRODUCTO where ID_CLIENTE = " + id_cliente;
+            Statement st2 = con.createStatement();
+            ResultSet rs = st2.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("id", rs.getInt("id"));
+                jObject.put("estado", rs.getString("ESTADO"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("id_cliente", rs.getInt("id_cliente"));
+                jArray.add(jObject);
+            }
+
+            st2.close();
+
         }
-        st.close();
+        cerrarConexion();
+        return jArray;
 
     }
-    **/
 
 }

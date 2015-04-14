@@ -67,6 +67,7 @@
 
                     this.cancelPedido=function(){
 
+
                         self.pedido = {};
                         self.pedido.id_pedido = self.id_pedido;
                         console.log('Form pedido cancelar '+JSON.stringify(self.pedido));
@@ -127,6 +128,23 @@ prodAndes.directive('toolbarConsultaProducto', function(){
     };
 });
 
+prodAndes.directive('toolbarConsultaPedidos', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/toolbar-consulta-pedidos.html',
+        controller:function(){
+            this.tab=0;
+            this.selectTab=function(setTab){
+                this.tab=setTab;
+            };
+            this.isSelected=function(tabParam){
+                return this.tab===tabParam;
+            };
+        },
+        controllerAs:'toolbarConsultaPedidosCtrl'
+    };
+});
+
 prodAndes.directive('toolbarConsultaSuministros', function(){
     return{
         restrict:'E',
@@ -144,31 +162,78 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
     };
 });
 
-prodAndes.directive('consultarProductosForm', function(){
+    prodAndes.directive('consultarProductosForm', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/consultar-productos-form.html',
+            controller: ['$http',function($http){
+                var self = this;
+
+
+                self.order='';
+                self.consulta = {};
+                self.productos = [];
+
+                this.isFull=function(){
+                    return self.productos.length>0;
+                };
+
+                this.darOrder = function(){
+
+                    console.log('Dar order '+JSON.stringify(self.consulta.order));
+                    return self.consulta.order;
+                }
+
+                this.enviarConsulta=function(consultaParam,criterio){
+
+                    self.productos = [];
+                    self.order='';
+
+                    console.log("Criterio "+criterio)
+                    self.consulta = consultaParam,
+                    self.consulta.Criterio = criterio;
+                    self.order=self.consulta.order;
+
+                    console.log('Form consulta '+JSON.stringify(self.consulta));
+                    $http.post('http://localhost:8080/backend/Servicios/consultarProductos' , self.consulta).success(function(data){
+
+                        console.log("Consultar productos "+JSON.stringify(data));
+                        self.productos=data;
+                        console.log("Consultar productos 2"+JSON.stringify(self.productos));
+                        self.consulta={};
+                    });
+
+
+                };
+            }],
+            controllerAs:'consultarProductosCtrl'
+        };
+    });
+    prodAndes.directive('consultarPedidosForm', function(){
     return{
         restrict:'E',
-        templateUrl: 'partials/consultar-productos-form.html',
+        templateUrl: 'partials/consultar-pedidos-form.html',
         controller: ['$http',function($http){
             var self = this;
 
 
             self.order='';
             self.consulta = {};
-            self.productos = [];
-
+            self.pedidos = [];
+            self.pedido={};
             this.isFull=function(){
-                return self.productos.length>0;
+                return self.pedidos.length>0;
             };
 
             this.darOrder = function(){
 
                 console.log('Dar order '+JSON.stringify(self.consulta.order));
                 return self.consulta.order;
-            }
+            };
 
             this.enviarConsulta=function(consultaParam,criterio){
 
-                self.productos = [];
+                self.pedidos = [];
                 self.order='';
 
                 console.log("Criterio "+criterio)
@@ -177,18 +242,33 @@ prodAndes.directive('consultarProductosForm', function(){
                 self.order=self.consulta.order;
 
                 console.log('Form consulta '+JSON.stringify(self.consulta));
-                $http.post('http://localhost:8080/backend/Servicios/consultarProductos' , self.consulta).success(function(data){
+                $http.post('http://localhost:8080/backend/Servicios/consultarPedidos' , self.consulta).success(function(data){
 
-                    console.log("Consultar productos "+JSON.stringify(data));
-                    self.productos=data;
-                    console.log("Consultar productos 2"+JSON.stringify(self.productos));
+                    console.log("Consultar pedidos "+JSON.stringify(data));
+                    self.pedidos=data;
+                    console.log("Consultar pedidos 2"+JSON.stringify(self.pedidos));
                     self.consulta={};
                 });
 
 
             };
+            this.cancelPedido=function(idPedido){
+
+                alert('alert cancel pedido '+idPedido)    
+                self.pedido = {};
+                self.pedido.id_pedido = idPedido;
+                console.log('Form pedido cancelar '+JSON.stringify(self.pedido));
+                $http.post('http://localhost:8080/backend/Servicios/cancelarPedido'
+                    , self.pedido).success(function(data){
+
+                        console.log('Data '+JSON.stringify(data));
+                        alert("Se ha cancelado su pedido");
+
+                });
+            };
+            
         }],
-        controllerAs:'consultarProductosCtrl'
+        controllerAs:'consultarPedidosCtrl'
     };
 });
 
@@ -202,6 +282,18 @@ prodAndes.directive('listaProductosConsulta', function(){
         controllerAs:'listaProductosConsulta'
     };
 });
+
+prodAndes.directive('listaPedidosConsulta', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/lista-pedidos-consulta.html',
+        controller:function(){
+
+        },
+        controllerAs:'listaPedidosConsulta'
+    };
+});
+
 
 
 prodAndes.directive('consultarMateriasForm', function(){

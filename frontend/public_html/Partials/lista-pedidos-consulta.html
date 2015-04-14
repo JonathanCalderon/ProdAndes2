@@ -1,0 +1,36 @@
+<h2 class="form-title">Pedidos encontrados</h2>
+<div class="panel panel-default">
+    <!-- Default panel contents -->
+    <div class="panel-heading">Pedidos</div>
+    <!-- Table -->
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Id</th>
+            <th>Estado</th>
+            <th>Fecha de Entrega</th>
+            <th>Fecha de Solicitud</th>
+            <th>Fecha Esperada de Entrega</th>
+            <th>Id Cliente</th>
+            
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="pedido in consultarPedidosCtrl.pedidos">
+            <td>{{pedido.id}}</td>
+            <td>{{pedido.estado}}</td>
+            <td>{{pedido.fecha_entrega}}</td>
+            <td>{{pedido.fecha_solicitud}}</td>
+            <td>{{pedido.fecha_esperada_entrega}}</td>
+            <td>{{pedido.id_cliente}}</td>
+            <td>
+            <form name="cancelPedidoForm" ng-submit="consultarPedidosCtrl.cancelPedido(pedido.id)" validate>
+               
+                    <input type="submit" value="Cancelar Pedido" class="btn btn-danger">
+                
+            </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div> 
