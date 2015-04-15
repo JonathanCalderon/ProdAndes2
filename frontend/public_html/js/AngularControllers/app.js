@@ -287,6 +287,61 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
     };
 });
 
+prodAndes.directive('consultarProveedoresForm', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/consultar-proveedores-form.html',
+        controller: ['$http',function($http){
+            var self = this;
+
+
+            self.order='';
+            self.consulta = {};
+            self.proveedores = [];
+            self.proveedor={};
+            self.proveedorSelected=[];
+            this.isFull=function(){
+                return self.proveedores.length>0;
+            };
+
+
+            this.isSelected=function(){
+
+                return self.proveedorSelected.length>0;
+            }
+
+            this.enviarConsulta=function(consultaParam,criterio){
+
+                self.proveedores = [];
+                self.order='';
+
+                console.log("Criterio "+criterio)
+                self.consulta = consultaParam,
+                self.consulta.Criterio = criterio;
+
+                console.log('Form consulta '+JSON.stringify(self.consulta));
+                $http.post('http://localhost:8080/backend/Servicios/consultarProveedores' , self.consulta).success(function(data){
+
+                    console.log("Consultar proveedores "+JSON.stringify(data));
+                    self.proveedores=data;
+                    console.log("Consultar proveedores 2"+JSON.stringify(self.pedidos));
+                    self.consulta={};
+                });
+
+
+            };
+            this.selectProveedor=function(idProveedor){
+
+                console.log('selectProveedores'+idProveedor)
+                self.proveedorSelected[0] = idProveedor;
+                console.log('selectProveedores 2' +self.proveedorSelected[0])
+            }
+            
+        }],
+        controllerAs:'consultarProveedoresCtrl'
+    };
+});
+
 prodAndes.directive('listaProductosConsulta', function(){
     return{
         restrict:'E',
@@ -308,7 +363,16 @@ prodAndes.directive('listaPedidosConsulta', function(){
         controllerAs:'listaPedidosConsulta'
     };
 });
+prodAndes.directive('listaProveedoresConsulta', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/lista-proveedores-consulta.html',
+        controller:function(){
 
+        },
+        controllerAs:'listaPedidosConsulta'
+    };
+});
 
 
 prodAndes.directive('consultarMateriasForm', function(){
@@ -567,6 +631,15 @@ prodAndes.directive('verPedidoForm', function(){
         controllerAs:'verPedidoCtrl'
     };
 });
+prodAndes.directive('verProveedorForm', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/ver-proveedor-form.html',
+        controller:function(){
 
+        },
+        controllerAs:'verProveedorCtrl'
+    };
+});
 })();
 

@@ -1586,5 +1586,212 @@ public class Prodandes {
         return jArray;
 
     }
+    
+     @POST
+    @Path("/consultarProveedores")
+    public JSONArray consultarProveedores(JSONObject jP) throws Exception {
+
+        JSONArray jArray = new JSONArray();
+        abrirConexion();
+
+        String criterio = jP.get("Criterio").toString();
+        if (criterio.equalsIgnoreCase("Documento Id")) {
+
+            String documentoId = jP.get("documentoId").toString();
+            
+
+            String sql = "select * from PROVEEDOR where DOCUMENTO_ID = '"+documentoId+"'";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("documento_id", rs.getString("documento_id"));
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("volumen_maximo", rs.getInt("volumen_maximo"));
+                jObject.put("tiempo_de_entrega", rs.getInt("tiempo_de_entrega"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        } else if (criterio.equalsIgnoreCase("Nombre")) {
+
+            String nombre = jP.get("nombre").toString();
+            
+
+            String sql = "select * from PROVEEDOR where NOMBRE LIKE '%"+nombre+"%'";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("documento_id", rs.getString("documento_id"));
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("volumen_maximo", rs.getInt("volumen_maximo"));
+                jObject.put("tiempo_de_entrega", rs.getInt("tiempo_de_entrega"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        }else if (criterio.equalsIgnoreCase("Ciudad")) {
+
+            String ciudad = jP.get("ciudad").toString();
+            
+
+            String sql = "select * from PROVEEDOR where CIUDAD LIKE '%"+ciudad+"%'";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+               JSONObject jObject = new JSONObject();
+                jObject.put("documento_id", rs.getString("documento_id"));
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("volumen_maximo", rs.getInt("volumen_maximo"));
+                jObject.put("tiempo_de_entrega", rs.getInt("tiempo_de_entrega"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        }else if (criterio.equalsIgnoreCase("Dirrecion")) {
+
+            String direccion = jP.get("direccion").toString();
+            
+
+            String sql = "select * from PROVEEDOR where DIRECCION LIKE '%"+direccion+"%'";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("documento_id", rs.getString("documento_id"));
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("volumen_maximo", rs.getInt("volumen_maximo"));
+                jObject.put("tiempo_de_entrega", rs.getInt("tiempo_de_entrega"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        }else if (criterio.equalsIgnoreCase("Telefono")) {
+
+            String telefono = jP.get("telefono").toString();
+            
+
+            String sql = "select * from PROVEEDOR where TELEFONO LIKE '%"+telefono+"%'";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("documento_id", rs.getString("documento_id"));
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("volumen_maximo", rs.getInt("volumen_maximo"));
+                jObject.put("tiempo_de_entrega", rs.getInt("tiempo_de_entrega"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        } else if (criterio.equalsIgnoreCase("Volumen Maximo")) {
+
+            int volMax = (int)jP.get("volumen_maximo");
+            
+
+            String sql = "select * from PROVEEDOR where volumen_maximo = "+volMax;
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("documento_id", rs.getString("documento_id"));
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("volumen_maximo", rs.getInt("volumen_maximo"));
+                jObject.put("tiempo_de_entrega", rs.getInt("tiempo_de_entrega"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        }else if (criterio.equalsIgnoreCase("Tiempo Entrega")) {
+
+            int tiempoEntrega = (int)jP.get("tiempo_de_entrega");
+            
+
+            String sql = "select * from PROVEEDOR where tiempo_de_entrega = "+tiempoEntrega;
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("documento_id", rs.getString("documento_id"));
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("volumen_maximo", rs.getInt("volumen_maximo"));
+                jObject.put("tiempo_de_entrega", rs.getInt("tiempo_de_entrega"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        }else if (criterio.equalsIgnoreCase("Representante Legal")) {
+
+            int representanteLegal = (int)jP.get("representante_legal");
+            
+
+            String sql = "select * from PROVEEDOR where representante_legal = "+representanteLegal;
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("documento_id", rs.getString("documento_id"));
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("volumen_maximo", rs.getInt("volumen_maximo"));
+                jObject.put("tiempo_de_entrega", rs.getInt("tiempo_de_entrega"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        }
+        
+        cerrarConexion();
+        return jArray;
+
+    }
 
 }
