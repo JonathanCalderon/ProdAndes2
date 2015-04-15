@@ -24,11 +24,10 @@
             <td>{{pedido.fecha_esperada_entrega}}</td>
             <td>{{pedido.id_cliente}}</td>
             <td>
-            <form name="cancelPedidoForm" ng-submit="consultarPedidosCtrl.cancelPedido(pedido.id)" validate>
-               
-                    <input type="submit" value="Cancelar Pedido" class="btn btn-danger">
-                
-            </form>
+                <input ng-click="consultarPedidosCtrl.cancelPedido(pedido.id)" value="Cancelar Pedido" class="btn btn-danger">
+            </td>
+            <td>
+                <input ng-click="consultarPedidosCtrl.selectPedido(pedido.id)" value="Ver" class="btn btn-warning">
             </td>
         </tr>
         </tbody>

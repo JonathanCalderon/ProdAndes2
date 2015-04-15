@@ -221,6 +221,10 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
             self.consulta = {};
             self.pedidos = [];
             self.pedido={};
+            self.pedidoSelected=[];
+            this.getSelected = function(){
+                return self.pedidoSelected[0];
+            }
             this.isFull=function(){
                 return self.pedidos.length>0;
             };
@@ -230,6 +234,11 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
                 console.log('Dar order '+JSON.stringify(self.consulta.order));
                 return self.consulta.order;
             };
+
+            this.isSelected=function(){
+
+                return self.pedidoSelected.length>0;
+            }
 
             this.enviarConsulta=function(consultaParam,criterio){
 
@@ -266,6 +275,12 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
 
                 });
             };
+            this.selectPedido=function(idPedido){
+
+                console.log('selectPedido '+idPedido)
+                self.pedidoSelected[0] = idPedido;
+                console.log('selectPedido 2' +self.pedidoSelected)
+            }
             
         }],
         controllerAs:'consultarPedidosCtrl'
@@ -542,5 +557,16 @@ prodAndes.directive('operarioMasActivoForm', function(){
         controllerAs:'operarioMasActivoCtrl'
     };
 });
+prodAndes.directive('verPedidoForm', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/ver-pedido-form.html',
+        controller:function(){
+
+        },
+        controllerAs:'verPedidoCtrl'
+    };
+});
+
 })();
 
