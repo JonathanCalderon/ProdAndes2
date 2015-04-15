@@ -1595,6 +1595,7 @@ public class Prodandes {
         abrirConexion();
 
         String criterio = jP.get("Criterio").toString();
+         System.out.println("Criterio: "+criterio);
         if (criterio.equalsIgnoreCase("Documento Id")) {
 
             String documentoId = jP.get("documentoId").toString();
@@ -1667,12 +1668,16 @@ public class Prodandes {
 
             }
             st.close();
-        }else if (criterio.equalsIgnoreCase("Dirrecion")) {
+        }else if (criterio.equalsIgnoreCase("Direccion")) {
 
+            
             String direccion = jP.get("direccion").toString();
             
 
             String sql = "select * from PROVEEDOR where DIRECCION LIKE '%"+direccion+"%'";
+            System.out.println("---------------------------------Query------------------------"
+                    + "-----------------------------------------------------");
+            System.out.println(sql);
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
 

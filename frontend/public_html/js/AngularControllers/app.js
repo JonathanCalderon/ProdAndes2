@@ -145,6 +145,23 @@ prodAndes.directive('toolbarConsultaPedidos', function(){
     };
 });
 
+prodAndes.directive('toolbarConsultaProveedores', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/toolbar-consulta-proveedores.html',
+        controller:function(){
+            this.tab=0;
+            this.selectTab=function(setTab){
+                this.tab=setTab;
+            };
+            this.isSelected=function(tabParam){
+                return this.tab===tabParam;
+            };
+        },
+        controllerAs:'toolbarConsultaProveedoresCtrl'
+    };
+});
+
 prodAndes.directive('toolbarConsultaSuministros', function(){
     return{
         restrict:'E',
