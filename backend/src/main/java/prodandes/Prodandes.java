@@ -922,7 +922,7 @@ public class Prodandes {
         con = null;
         Class.forName("oracle.jdbc.driver.OracleDriver");
         con = DriverManager.getConnection("jdbc:oracle:thin:@157.253.238.224:1531:prod", "ISIS2304271510", "rproxyquark");
-        con.setAutoCommit(false);
+        con.setAutoCommit(true);
     }
 
     public void cerrarConexion() throws Exception {
@@ -1799,4 +1799,273 @@ public class Prodandes {
 
     }
 
+         // desactivarEstacion
+    
+    @POST
+    @Path("/desactivarEstacion")
+    public JSONObject desactivarEstacion(JSONObject jO) throws Exception {
+        
+        abrirConexion();
+        
+        // Contar activos st2
+
+        String query2 = "select count(*) as cuenta from estacion where ESTADO='activo'";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query2);
+        Statement st2 = con.createStatement();
+        ResultSet rs2 = st2.executeQuery(query2);
+        int num_est_activas = 0;
+        while (rs2.next()) {
+            num_est_activas = rs2.getInt("CUENTA");
+            System.out.println("num_est_activas: " + num_est_activas);
+        }
+        st2.close();
+        
+        // Contar etapas st3
+        
+        String query3 = "select count(*) as cuenta from etapa_de_produccion";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query3);
+        Statement st3 = con.createStatement();
+        ResultSet rs3 = st3.executeQuery(query3);
+        int num_etapas = 0;
+        while (rs3.next()) {
+            num_etapas = rs3.getInt("CUENTA");
+            System.out.println("num_etapas: " + num_etapas);
+        }
+        st3.close();
+        
+        //  Verificacion: no hay estaciones activas
+        
+        if(num_est_activas == 1)
+        {
+            JSONObject jRespuesta =  new JSONObject();
+            jRespuesta.put("Respuesta", "No se puede borrar estacion");
+            rollback();
+            return jRespuesta;
+        }
+        
+        // Cambiar estado st1
+        
+        int estacion_codigo = Integer.parseInt(jO.get("codigo").toString());
+        String query1 = "UPDATE ESTACION SET ESTADO = 'inactivo' WHERE CODIGO = "+estacion_codigo;
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query1);
+        System.out.println("Estaciones actualizadas");
+        Statement st1 = con.createStatement();
+        st1.executeUpdate(query1);
+        st1.close();
+        
+        // Borrar relaciones etapa_estacion st4
+        
+        String query4 = "DELETE FROM ETAPA_ESTACION";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query4);
+        Statement st4 = con.createStatement();
+        st4.executeUpdate(query4);
+        st4.close();
+        
+        // Seleccionar etapas st5
+        
+        String query5 = ("select * from etapa_de_produccion");
+        System.out.println(query5);
+        Statement st5 = con.createStatement();
+        ResultSet rs5 = st5.executeQuery(query5);
+        int etapas[] = new int [num_etapas];
+        int temp = 0;
+        int i = 0;
+        while (rs5.next()) {
+            System.out.println("indice: "+i);
+            temp = rs5.getInt("NUMERO_SECUENCIA");
+            System.out.println("etapas["+i+"]"+" = "+temp);
+            etapas[i] = temp;
+            i++;
+        }
+        System.out.println(etapas);
+        st5.close();
+        
+        // Seleccionar estaciones st6
+        
+        String query6 = ("select * from estacion where ESTADO = 'activo'");
+        System.out.println(query6);
+        Statement st6 = con.createStatement();
+        ResultSet rs6 = st6.executeQuery(query6);
+        int estaciones[] = new int [num_est_activas-1];
+        temp = 0;
+        i = 0;
+        while (rs6.next()) {
+            temp = rs6.getInt("CODIGO");
+            System.out.println("estaciones["+i+"]"+" = "+temp);
+            estaciones[i] = temp;
+            i++;
+        }
+        System.out.println(estaciones);
+        st6.close();
+        
+        // Crear relaciones st7
+        
+        String query7 = ("");
+        System.out.println(query7);
+        Statement st7 = null;
+        int i_estacion = 0;
+        for(int k=0;k<etapas.length;k++)
+        {
+            if(i_estacion==estaciones.length)
+            {
+                i_estacion=0;
+            }
+            System.out.println("Etapa: "+k);
+            System.out.println("Estacion: "+i_estacion);
+            System.out.println("etapas[k] "+etapas[k]);
+            System.out.println("estaciones[i_estacion] "+estaciones[i_estacion]);
+            query7 = ("INSERT INTO ETAPA_ESTACION (ETAPA_ID, ESTACION_ID) VALUES ('"+etapas[k]+"', '"+estaciones[i_estacion]+"')");
+            System.out.println(query7);
+            st7 = con.createStatement();
+            st7.executeUpdate(query7);
+            i_estacion++;
+        }
+        
+        // Cerrar conexion
+        
+        cerrarConexion();
+        JSONObject jRespuestaOk =  new JSONObject();
+        jRespuestaOk.put("Respuesta", "Proceso correcto");
+        return jRespuestaOk;
+    }
+
+    // activarEstacion
+    
+    @POST
+    @Path("/activarEstacion")
+    public JSONObject activarEstacion(JSONObject jO) throws Exception {
+        
+        abrirConexion();
+        
+        // Contar activos st2
+
+        String query2 = "select count(*) as cuenta from estacion where ESTADO='activo'";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query2);
+        Statement st2 = con.createStatement();
+        ResultSet rs2 = st2.executeQuery(query2);
+        int num_est_activas = 0;
+        while (rs2.next()) {
+            num_est_activas = rs2.getInt("CUENTA");
+            System.out.println("num_est_activas: " + num_est_activas);
+        }
+        st2.close();
+        
+        // Contar etapas st3
+        
+        String query3 = "select count(*) as cuenta from etapa_de_produccion";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query3);
+        Statement st3 = con.createStatement();
+        ResultSet rs3 = st3.executeQuery(query3);
+        int num_etapas = 0;
+        while (rs3.next()) {
+            num_etapas = rs3.getInt("CUENTA");
+            System.out.println("num_etapas: " + num_etapas);
+        }
+        st3.close();
+        
+        //  Verificacion: no hay estaciones activas
+        /*
+        if(num_est_activas == 1)
+        {
+            JSONObject jRespuesta =  new JSONObject();
+            jRespuesta.put("Respuesta", "No se puede borrar estacion");
+            rollback();
+            return jRespuesta;
+        }
+        */
+        // Cambiar estado st1
+        
+        int estacion_codigo = Integer.parseInt(jO.get("codigo").toString());
+        String query1 = "UPDATE ESTACION SET ESTADO = 'activo' WHERE CODIGO = "+estacion_codigo;
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query1);
+        System.out.println("Estaciones actualizadas");
+        Statement st1 = con.createStatement();
+        st1.executeUpdate(query1);
+        st1.close();
+        
+        // Borrar relaciones etapa_estacion st4
+        
+        String query4 = "DELETE FROM ETAPA_ESTACION";
+        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+        System.out.println(query4);
+        Statement st4 = con.createStatement();
+        st4.executeUpdate(query4);
+        st4.close();
+        
+        // Seleccionar etapas st5
+        
+        String query5 = ("select * from etapa_de_produccion");
+        System.out.println(query5);
+        Statement st5 = con.createStatement();
+        ResultSet rs5 = st5.executeQuery(query5);
+        int etapas[] = new int [num_etapas];
+        int temp = 0;
+        int i = 0;
+        while (rs5.next()) {
+            System.out.println("indice: "+i);
+            temp = rs5.getInt("NUMERO_SECUENCIA");
+            System.out.println("etapas["+i+"]"+" = "+temp);
+            etapas[i] = temp;
+            i++;
+        }
+        System.out.println(etapas);
+        st5.close();
+        
+        // Seleccionar estaciones st6
+        
+        String query6 = ("select * from estacion where ESTADO = 'activo'");
+        System.out.println(query6);
+        Statement st6 = con.createStatement();
+        ResultSet rs6 = st6.executeQuery(query6);
+        int estaciones[] = new int [num_est_activas+1];
+        temp = 0;
+        i = 0;
+        while (rs6.next()) {
+            temp = rs6.getInt("CODIGO");
+            System.out.println("estaciones["+i+"]"+" = "+temp);
+            estaciones[i] = temp;
+            i++;
+        }
+        System.out.println(estaciones);
+        st6.close();
+        
+        // Crear relaciones st7
+        
+        String query7 = ("");
+        System.out.println(query7);
+        Statement st7 = null;
+        int i_estacion = 0;
+        for(int k=0;k<etapas.length;k++)
+        {
+            if(i_estacion==estaciones.length)
+            {
+                i_estacion=0;
+            }
+            System.out.println("Etapa: "+k);
+            System.out.println("Estacion: "+i_estacion);
+            System.out.println("etapas[k] "+etapas[k]);
+            System.out.println("estaciones[i_estacion] "+estaciones[i_estacion]);
+            query7 = ("INSERT INTO ETAPA_ESTACION (ETAPA_ID, ESTACION_ID) VALUES ('"+etapas[k]+"', '"+estaciones[i_estacion]+"')");
+            System.out.println(query7);
+            st7 = con.createStatement();
+            st7.executeUpdate(query7);
+            i_estacion++;
+        }
+        
+        // Cerrar conexion
+        
+        cerrarConexion();
+        JSONObject jRespuestaOk =  new JSONObject();
+        jRespuestaOk.put("Respuesta", "Proceso correcto");
+        return jRespuestaOk;
+    }
+    
+    
 }
