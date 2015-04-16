@@ -2228,6 +2228,77 @@ public class Prodandes {
         }
         
     }
+    
+    @POST
+    @Path("/consultarCliente")
+    public JSONArray consultarCliente(JSONObject jP) throws Exception {
+
+        JSONArray jArray = new JSONArray();
+        abrirConexion();
+
+        String criterio = jP.get("criterio").toString();
+        System.out.println("Criterio: " + criterio);
+        if (criterio.equalsIgnoreCase("Nombre")) {
+
+            String nombre = jP.get("nombre").toString();
+
+            String sql = "select * from CLIENTE inner join PEDIDO_PRODUCTO on CLIENTE.NUMERO_REGISTRO = PEDIDO_PRODUCTO.ID_CLIENTE where NOMBRE LIKE '%" + nombre + "%'";
+            System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+            System.out.println(sql);
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("numero_registro", rs.getInt("numero_registro"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("estado", rs.getString("estado"));
+                jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jArray.add(jObject);
+            }
+            st.close();
+        } else {
+
+            String ciudad = jP.get("ciudad").toString();
+
+            String sql = "select * from CLIENTE inner join PEDIDO_PRODUCTO on CLIENTE.NUMERO_REGISTRO = PEDIDO_PRODUCTO.ID_CLIENTE where CIUDAD LIKE '%" + ciudad + "%'";
+            System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
+            System.out.println(sql);
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+
+                JSONObject jObject = new JSONObject();
+                jObject.put("nombre", rs.getString("nombre"));
+                jObject.put("numero_registro", rs.getInt("numero_registro"));
+                jObject.put("ciudad", rs.getString("ciudad"));
+                jObject.put("direccion", rs.getString("direccion"));
+                jObject.put("telefono", rs.getString("telefono"));
+                jObject.put("representante_legal", rs.getInt("representante_legal"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("estado", rs.getString("estado"));
+                jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jArray.add(jObject);
+
+            }
+            st.close();
+        }
+        cerrarConexion();
+        return jArray;
+
+    }
+    
     @POST
     @Path("/en")
     public JSONObject en() {
