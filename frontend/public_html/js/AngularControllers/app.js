@@ -292,11 +292,19 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
 
                 });
             };
-            this.selectPedido=function(idPedido){
+            this.verPedido=function(idPedido){
 
                 console.log('selectPedido '+idPedido)
                 self.pedidoSelected[0] = idPedido;
                 console.log('selectPedido 2' +self.pedidoSelected)
+                self.consulta.id_pedido = idPedido;
+                $http.post('http://localhost:8080/backend/Servicios/verPedido' , self.consulta).success(function(data){
+
+                    console.log("VerPedido pedidos "+JSON.stringify(data));
+                    self.pedidoSelected[0] = JSON.stringify(data);
+                    self.consulta={};
+                });
+                self.consulta={};
             }
             
         }],
@@ -347,11 +355,19 @@ prodAndes.directive('consultarProveedoresForm', function(){
 
 
             };
-            this.selectProveedor=function(idProveedor){
+            this.verProveedor=function(idProveedor){
 
-                console.log('selectProveedores'+idProveedor)
+                console.log('verProveedor '+idProveedor)
                 self.proveedorSelected[0] = idProveedor;
-                console.log('selectProveedores 2' +self.proveedorSelected[0])
+                console.log('verProveedor 2' +self.proveedorSelected)
+                self.consulta.id_proveedor = idProveedor;
+                $http.post('http://localhost:8080/backend/Servicios/verProveedor' , self.consulta).success(function(data){
+
+                    console.log("VerProveedor "+JSON.stringify(data));
+                    self.proveedorSelected[0] = JSON.stringify(data);
+                    self.consulta={};
+                });
+                self.consulta={};
             }
             
         }],
