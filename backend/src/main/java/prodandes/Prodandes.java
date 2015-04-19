@@ -2299,28 +2299,5 @@ public class Prodandes {
 
     }
     
-    @POST
-    @Path("/en")
-    public JSONObject en() {
-        JSONObject jObject = new JSONObject();
-        jObject.put("documento_id", "a");
-        jObject.put("nombre", "nombre");
-        jObject.put("ciudad", "ciudad");
-        jObject.put("direccion", "direccion");
-        jObject.put("telefono", "telefono");
-        jObject.put("volumen_maximo", "volumen_maximo");
-        jObject.put("tiempo_de_entrega", "tiempo_de_entrega");
-        jObject.put("representante_legal", "representante_legal");
-        JSONObject jO = new JSONObject();
-        jO.put("objeto1", "objeto1");
-        jO.put("obj2", "obj2");
-        JSONObject jO2 = new JSONObject();
-        jO2.put("objeto12", "objeto12");
-        jO2.put("obj22", "obj22");
-        JSONArray jA = new JSONArray();
-        jA.add(jO);
-        jA.add(jO2);
-        jObject.put("objeto", jA);
-        return jObject;
-    }
+   
 }

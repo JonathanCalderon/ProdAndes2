@@ -301,7 +301,7 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
                 $http.post('http://localhost:8080/backend/Servicios/verPedido' , self.consulta).success(function(data){
 
                     console.log("VerPedido pedidos "+JSON.stringify(data));
-                    self.pedidoSelected[0] = JSON.stringify(data);
+                    self.pedidoSelected[0] = data;
                     self.consulta={};
                 });
                 self.consulta={};
@@ -364,7 +364,7 @@ prodAndes.directive('consultarProveedoresForm', function(){
                 $http.post('http://localhost:8080/backend/Servicios/verProveedor' , self.consulta).success(function(data){
 
                     console.log("VerProveedor "+JSON.stringify(data));
-                    self.proveedorSelected[0] = JSON.stringify(data);
+                    self.proveedorSelected[0] = data;
                     self.consulta={};
                 });
                 self.consulta={};
