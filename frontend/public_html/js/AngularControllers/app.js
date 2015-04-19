@@ -135,6 +135,7 @@ prodAndes.directive('toolbarConsultaPedidos', function(){
         controller:function(){
             this.tab=0;
             this.selectTab=function(setTab){
+                console.log("Select Tab Pedidos");
                 this.tab=setTab;
             };
             this.isSelected=function(tabParam){
@@ -251,6 +252,11 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
                 console.log('Dar order '+JSON.stringify(self.consulta.order));
                 return self.consulta.order;
             };
+            this.limpiarSelected=function(){
+
+                console.log("limpiar selected");
+                self.pedidoSelected=[];
+            }
 
             this.isSelected=function(){
 
@@ -259,9 +265,10 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
 
             this.enviarConsulta=function(consultaParam,criterio){
 
+
                 self.pedidos = [];
                 self.order='';
-
+                self.pedidoSelected = [];
                 console.log("Criterio "+criterio)
                 self.consulta = consultaParam,
                 self.consulta.Criterio = criterio;
@@ -339,7 +346,7 @@ prodAndes.directive('consultarProveedoresForm', function(){
 
                 self.proveedores = [];
                 self.order='';
-
+                self.proveedorSelected=[];
                 console.log("Criterio "+criterio)
                 self.consulta = consultaParam,
                 self.consulta.Criterio = criterio;

@@ -2099,18 +2099,19 @@ public class Prodandes {
                 jO.put("productos", jItems);
                 st2.close();
                 //Materias Primas
-                sql="select * from MATERIA_PRIMA_ITEM where ID_PEDIDO_PRODUCTO="+idPedido;
+                sql="select (items*cantidad_unidades)as cantidad,id_materia_prima from "
+                        + "(select ITEM.NOMBRE_PRODUCTO as id_producto, count(*) as items "
+                        + "from ITEM where ID_PEDIDO="+idPedido+" group by NOMBRE_PRODUCTO)" +
+                            " natural inner join MATERIAS_PRIMAS_PRODUCTO";
                 st2 = con.createStatement();
                 rs2 = st2.executeQuery(sql);
                 
                 JSONArray jMateriasPrimas = new JSONArray();
                 while( rs2.next()){
                     
-                    JSONObject jMateriaPrima = new JSONObject();                    
-                    jMateriaPrima.put("id", rs2.getInt("id"));
-                    jMateriaPrima.put("materia", rs2.getString("materia"));
+                    JSONObject jMateriaPrima = new JSONObject(); 
+                    jMateriaPrima.put("materia", rs2.getString("id_materia_prima"));
                     jMateriaPrima.put("cantidad", rs2.getInt("cantidad"));
-                    jMateriaPrima.put("estado", rs2.getString("estado"));
                     jMateriasPrimas.add(jMateriaPrima);
                 }                
                 jO.put("materias_primas", jMateriasPrimas);
