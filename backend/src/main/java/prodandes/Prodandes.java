@@ -294,19 +294,21 @@ public class Prodandes {
             st.close();
 
             sql = "update ITEM set ESTADO='En Bodega',ID_PEDIDO=null WHERE ID_PEDIDO=" + id_pedido
-                    + " AND ESTADO='Reservado'";
+                    + " AND (ESTADO='Reservado' OR ESTADO='En Bodega')";
             st = con.createStatement();
             System.out.println("------------------QUERY----------------------------");
             System.out.println(sql);
             st.executeUpdate(sql);
             st.close();
 
-            sql = "delete from ITEM WHERE ID_PEDIDO=" + id_pedido + "AND ESTADO='Pre Produccion'";
+            sql = "delete from ITEM WHERE ID_PEDIDO=" + id_pedido + " AND ESTADO='Pre Produccion'";
             st = con.createStatement();
             System.out.println("------------------QUERY----------------------------");
             System.out.println(sql);
             st.executeUpdate(sql);
             st.close();
+            
+      
 
             sql = "delete from PEDIDO_PRODUCTO WHERE ID=" + id_pedido;
             st = con.createStatement();
@@ -2118,18 +2120,19 @@ public class Prodandes {
                 st2.close();
                 
                 //Componentes
-                sql="select * from COMPONENTE_ITEM where ID_PEDIDO_PRODUCTO="+idPedido;
+                sql="select (items*cantidad_unidades)as unidades,id_componente from "
+                        + "(select ITEM.NOMBRE_PRODUCTO as id_producto, count(*) as items from "
+                        + "ITEM where ID_PEDIDO="+idPedido+" group by NOMBRE_PRODUCTO) natural inner join "
+                        + "COMPONENTES_PRODUCTO";
                 st2 = con.createStatement();
                 rs2 = st2.executeQuery(sql);
                 
                 JSONArray jComponentes = new JSONArray();
                 while( rs2.next()){
                     
-                    JSONObject jComponente = new JSONObject();                    
-                    jComponente.put("id", rs2.getInt("id"));
-                    jComponente.put("componente", rs2.getString("componente"));
+                    JSONObject jComponente = new JSONObject();
+                    jComponente.put("componente", rs2.getString("id_componente"));
                     jComponente.put("unidades", rs2.getInt("unidades"));
-                    jComponente.put("estado", rs2.getString("estado"));
                     jComponentes.add(jComponente);
                 }                
                 jO.put("componentes", jComponentes);
