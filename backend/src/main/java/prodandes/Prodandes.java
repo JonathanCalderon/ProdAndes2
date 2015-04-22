@@ -294,21 +294,19 @@ public class Prodandes {
             st.close();
 
             sql = "update ITEM set ESTADO='En Bodega',ID_PEDIDO=null WHERE ID_PEDIDO=" + id_pedido
-                    + " AND (ESTADO='Reservado' OR ESTADO='En Bodega')";
+                    + " AND ESTADO='Reservado'";
             st = con.createStatement();
             System.out.println("------------------QUERY----------------------------");
             System.out.println(sql);
             st.executeUpdate(sql);
             st.close();
 
-            sql = "delete from ITEM WHERE ID_PEDIDO=" + id_pedido + " AND ESTADO='Pre Produccion'";
+            sql = "delete from ITEM WHERE ID_PEDIDO=" + id_pedido + "AND ESTADO='Pre Produccion'";
             st = con.createStatement();
             System.out.println("------------------QUERY----------------------------");
             System.out.println(sql);
             st.executeUpdate(sql);
             st.close();
-            
-      
 
             sql = "delete from PEDIDO_PRODUCTO WHERE ID=" + id_pedido;
             st = con.createStatement();
@@ -2120,19 +2118,18 @@ public class Prodandes {
                 st2.close();
                 
                 //Componentes
-                sql="select (items*cantidad_unidades)as unidades,id_componente from "
-                        + "(select ITEM.NOMBRE_PRODUCTO as id_producto, count(*) as items from "
-                        + "ITEM where ID_PEDIDO="+idPedido+" group by NOMBRE_PRODUCTO) natural inner join "
-                        + "COMPONENTES_PRODUCTO";
+                sql="select * from COMPONENTE_ITEM where ID_PEDIDO_PRODUCTO="+idPedido;
                 st2 = con.createStatement();
                 rs2 = st2.executeQuery(sql);
                 
                 JSONArray jComponentes = new JSONArray();
                 while( rs2.next()){
                     
-                    JSONObject jComponente = new JSONObject();
-                    jComponente.put("componente", rs2.getString("id_componente"));
+                    JSONObject jComponente = new JSONObject();                    
+                    jComponente.put("id", rs2.getInt("id"));
+                    jComponente.put("componente", rs2.getString("componente"));
                     jComponente.put("unidades", rs2.getInt("unidades"));
+                    jComponente.put("estado", rs2.getString("estado"));
                     jComponentes.add(jComponente);
                 }                
                 jO.put("componentes", jComponentes);
@@ -2251,21 +2248,38 @@ public class Prodandes {
             System.out.println(sql);
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            int num_act = -1;
+            int num = -1;
 
             while (rs.next()) {
-
+                
                 JSONObject jObject = new JSONObject();
-                jObject.put("nombre", rs.getString("nombre"));
-                jObject.put("numero_registro", rs.getInt("numero_registro"));
-                jObject.put("ciudad", rs.getString("ciudad"));
-                jObject.put("direccion", rs.getString("direccion"));
-                jObject.put("telefono", rs.getString("telefono"));
-                jObject.put("representante_legal", rs.getInt("representante_legal"));
-                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
-                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
-                jObject.put("estado", rs.getString("estado"));
-                jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
-                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                num = rs.getInt("numero_registro");
+                if(num != num_act)
+                {
+                    jObject.put("numero_registro", num);
+                    jObject.put("nombre", rs.getString("nombre"));
+                    jObject.put("ciudad", rs.getString("ciudad"));
+                    jObject.put("direccion", rs.getString("direccion"));
+                    jObject.put("telefono", rs.getString("telefono"));
+                    jObject.put("representante_legal", rs.getInt("representante_legal"));
+                    num_act = num;
+                }
+                else
+                {
+                    jObject.put("numero_registro", "");
+                    jObject.put("nombre", "");
+                    jObject.put("ciudad", "");
+                    jObject.put("direccion", "");
+                    jObject.put("telefono", "");
+                    jObject.put("representante_legal", "");
+                }
+                    jObject.put("ID", rs.getDate("ID"));
+                    jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                    jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                    jObject.put("estado", rs.getString("estado"));
+                    jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
+                    jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
                 jArray.add(jObject);
             }
             st.close();
@@ -2278,21 +2292,38 @@ public class Prodandes {
             System.out.println(sql);
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            int num_act = -1;
+            int num = -1;
 
             while (rs.next()) {
 
                 JSONObject jObject = new JSONObject();
-                jObject.put("nombre", rs.getString("nombre"));
-                jObject.put("numero_registro", rs.getInt("numero_registro"));
-                jObject.put("ciudad", rs.getString("ciudad"));
-                jObject.put("direccion", rs.getString("direccion"));
-                jObject.put("telefono", rs.getString("telefono"));
-                jObject.put("representante_legal", rs.getInt("representante_legal"));
-                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
-                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
-                jObject.put("estado", rs.getString("estado"));
-                jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
-                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                num = rs.getInt("numero_registro");
+                if(num != num_act)
+                {
+                    jObject.put("numero_registro", num);
+                    jObject.put("nombre", rs.getString("nombre"));
+                    jObject.put("ciudad", rs.getString("ciudad"));
+                    jObject.put("direccion", rs.getString("direccion"));
+                    jObject.put("telefono", rs.getString("telefono"));
+                    jObject.put("representante_legal", rs.getInt("representante_legal"));
+                    num_act = num;
+                }
+                else
+                {
+                    jObject.put("numero_registro", "");
+                    jObject.put("nombre", "");
+                    jObject.put("ciudad", "");
+                    jObject.put("direccion", "");
+                    jObject.put("telefono", "");
+                    jObject.put("representante_legal", "");
+                }
+                    jObject.put("ID", rs.getDate("ID"));
+                    jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                    jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                    jObject.put("estado", rs.getString("estado"));
+                    jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
+                    jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
                 jArray.add(jObject);
 
             }
