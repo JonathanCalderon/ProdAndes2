@@ -128,6 +128,23 @@ prodAndes.directive('toolbarConsultaProducto', function(){
     };
 });
 
+prodAndes.directive('toolbarConsultaClientes', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/toolbar-consulta-clientes.html',
+        controller:function(){
+            this.tab=0;
+            this.selectTab=function(setTab){
+                this.tab=setTab;
+            };
+            this.isSelected=function(tabParam){
+                return this.tab===tabParam;
+            };
+        },
+        controllerAs:'toolbarConsultaClientesCtrl'
+    };
+});
+
 prodAndes.directive('toolbarConsultaPedidos', function(){
     return{
         restrict:'E',
@@ -227,6 +244,47 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
             controllerAs:'consultarProductosCtrl'
         };
     });
+    
+    prodAndes.directive('consultarClientesForm', function(){
+        return{
+            restrict:'E',
+            templateUrl: 'partials/consultar-clientes-form.html',
+            controller: ['$http',function($http){
+                var self = this;
+
+                self.consulta = {};
+                self.clientes = [];
+
+                this.isFull=function(){
+                    return self.clientes.length>0;
+                };
+
+                this.enviarConsulta=function(consultaParam,criterio){
+
+                    self.clientes = [];
+                    self.order='';
+
+                    console.log("LOG - - - - Criterio "+criterio)
+                    self.consulta = consultaParam,
+                    self.consulta.Criterio = criterio;
+                    self.order=self.consulta.order;
+
+                    console.log('Form consulta '+JSON.stringify(self.consulta));
+                    $http.post('http://localhost:8080/backend/Servicios/consultarClientes' , self.consulta).success(function(data){
+
+                        console.log("Consultar clietes "+JSON.stringify(data));
+                        self.clientes=data;
+                        console.log("Consultar clientes 2"+JSON.stringify(self.clientes));
+                        self.consulta={};
+                    });
+
+
+                };
+            }],
+            controllerAs:'consultarClientesCtrl'
+        };
+    });
+    
     prodAndes.directive('consultarPedidosForm', function(){
     return{
         restrict:'E',

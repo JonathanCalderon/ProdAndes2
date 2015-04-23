@@ -2231,7 +2231,7 @@ public class Prodandes {
     }
     
     @POST
-    @Path("/consultarCliente")
+    @Path("/consultarClientes")
     public JSONArray consultarCliente(JSONObject jP) throws Exception {
 
         JSONArray jArray = new JSONArray();
