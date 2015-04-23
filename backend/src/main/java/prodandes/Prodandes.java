@@ -5,10 +5,12 @@
  */
 package prodandes;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,11 +21,8 @@ import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -55,11 +54,16 @@ public class Prodandes {
     @Path("/registrarPedido")
     public JSONObject registrarPedido(JSONObject jO) throws Exception {
         try {
-
             JSONObject jRespuesta = new JSONObject();
             String resp = "";
 
             abrirConexion();
+           
+            String lock = "lock table " + "pedido_producto" + " in exclusive mode";
+            Statement stmt1 = con.createStatement();
+            stmt1.execute(lock);
+            stmt1.close();
+
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             java.util.Date date = format.parse(jO.get("fechaEsperada").toString().substring(0, 10));
             System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
@@ -86,7 +90,7 @@ public class Prodandes {
             String sql = "select max (id) as MAXIMO from PEDIDO_PRODUCTO";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
-
+            escribirEnLog(sql);
             int id_pedido = 1;
             if (rs.next()) {
                 id_pedido = rs.getInt("MAXIMO") + 1;
@@ -104,7 +108,8 @@ public class Prodandes {
                 Statement st2 = con.createStatement();
 
                 st2.executeUpdate(sql);
-
+                
+                escribirEnLog(sql);
                 st2.close();
             }
             st.close();
@@ -122,6 +127,8 @@ public class Prodandes {
                 System.out.println("------------------QUERY----------------------------");
                 System.out.println(sql);
                 st3.executeUpdate(sql);
+                
+                escribirEnLog(sql);
                 st3.close();
                 resp = "Se ha registrado su pedido, la fecha de entrega es " + sFecha;
             } else {
@@ -269,6 +276,12 @@ public class Prodandes {
 
         try {
             abrirConexion();
+
+            String lock = "lock table " + "pedido_producto" + " in exclusive mode";
+            Statement stmt1 = con.createStatement();
+            stmt1.execute(lock);
+            stmt1.close();
+
             int id_pedido = (int) jP.get("id_pedido");
             System.out.println("Id Pedido " + id_pedido);
             String sql = "update ESTACION set ESTADO='Disponible',ID_PEDIDO=null WHERE ID_PEDIDO=" + id_pedido;
@@ -317,7 +330,7 @@ public class Prodandes {
             cerrarConexion();
         } catch (Exception e) {
             e.printStackTrace();
-            cerrarConexion();
+            rollback();
         }
     }
 
@@ -329,91 +342,127 @@ public class Prodandes {
      * @param id_pedido
      */
     public void registrarEntregaPedidoProductosCliente(JSONObject jP) throws Exception {
+        try {
+            int id_pedido = (int) jP.get("id_pedido");
+            abrirConexion();
 
-        int id_pedido = (int) jP.get("id_pedido");
-        abrirConexion();
-        String query = "select cantidad_producto from PEDIDO_PRODUCTO WHERE ID=" + id_pedido;
+            String lock = "lock table " + "item" + " in exclusive mode";
+            Statement stmt1 = con.createStatement();
+            stmt1.execute(lock);
+            stmt1.close();
+            lock = "lock table " + "pedido_producto" + " in exclusive mode";
+            stmt1 = con.createStatement();
+            stmt1.execute(lock);
+            stmt1.close();
 
-        Statement st = con.createStatement();
-        ResultSet rs = st.executeQuery(query);
-        int cantidad = -1;
-        if (rs.next()) {
-            cantidad = rs.getInt("cantidad_producto");
-        }
-        if (cantidad == -1) {
-            throw new Exception("No se encontró el pedido");
-        }
+            String query = "select cantidad_producto from PEDIDO_PRODUCTO WHERE ID=" + id_pedido;
 
-        st.close();
-        query = "select * from ITEM where ID_PEDIDO=" + id_pedido + " and ESTADO='Reservado'";
-        st = con.createStatement();
-        rs = st.executeQuery(query);
-        int cantidadProductosProducidos = 0;
-        while (rs.next()) {
-
-            cantidadProductosProducidos++;
-        }
-        st.close();
-
-        if (cantidadProductosProducidos < cantidad) {
-            rollback();
-            throw new Exception("No se han terminado de producir todos los productos");
-
-        } else {
-            st = con.createStatement();
-            rs = st.executeQuery(query);
-
-            while (rs.next()) {
-
-                int id = rs.getInt("ID");
-                String sql2 = "update ITEM set ESTADO='Entregado' where ID = " + id;
-
-                Statement st2 = con.createStatement();
-                st2.executeUpdate(sql2);
-                st2.close();
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(query);
+            int cantidad = -1;
+            if (rs.next()) {
+                cantidad = rs.getInt("cantidad_producto");
+            }
+            if (cantidad == -1) {
+                throw new Exception("No se encontró el pedido");
             }
 
             st.close();
-
-            query = "UPDATE PEDIDO_PRODUCTO SET ESTADO='Entregado' WHERE ID=" + id_pedido;
+            query = "select * from ITEM where ID_PEDIDO=" + id_pedido + " and ESTADO='Reservado'";
             st = con.createStatement();
-            st.executeUpdate(query);
+            rs = st.executeQuery(query);
+            int cantidadProductosProducidos = 0;
+            while (rs.next()) {
+
+                cantidadProductosProducidos++;
+            }
             st.close();
+
+            if (cantidadProductosProducidos < cantidad) {
+                rollback();
+                throw new Exception("No se han terminado de producir todos los productos");
+
+            } else {
+                st = con.createStatement();
+                rs = st.executeQuery(query);
+
+                while (rs.next()) {
+
+                    int id = rs.getInt("ID");
+                    String sql2 = "update ITEM set ESTADO='Entregado' where ID = " + id;
+
+                    Statement st2 = con.createStatement();
+                    st2.executeUpdate(sql2);
+                    st2.close();
+                }
+
+                st.close();
+
+                query = "UPDATE PEDIDO_PRODUCTO SET ESTADO='Entregado' WHERE ID=" + id_pedido;
+                st = con.createStatement();
+                st.executeUpdate(query);
+                st.close();
+            }
+            cerrarConexion();
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
         }
-        cerrarConexion();
     }
 
     @POST
     @Path("/consultarProductos")
     public JSONArray consultarProductos(JSONObject jP) throws Exception {
+        try {
+            JSONArray jArray = new JSONArray();
+            abrirConexion();
 
-        JSONArray jArray = new JSONArray();
-        abrirConexion();
+            String criterio = jP.get("Criterio").toString();
+            if (criterio.equalsIgnoreCase("Rango")) {
 
-        String criterio = jP.get("Criterio").toString();
-        if (criterio.equalsIgnoreCase("Rango")) {
+                int rango1 = (int) jP.get("Rango1");
+                int rango2 = (int) jP.get("Rango2");
 
-            int rango1 = (int) jP.get("Rango1");
-            int rango2 = (int) jP.get("Rango2");
+                String sql = "Select * from (Select Producto.Nombre as nombreProducto,count(*) as cantidadInventario "
+                        + "from (Item inner join Producto on "
+                        + "Producto.nombre=Item.nombre_Producto)"
+                        + "WHERE Item.Estado ='En Bodega' GROUP BY Producto.nombre) where cantidadInventario>" + rango1
+                        + " AND cantidadInventario<" + rango2;
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql);
 
-            String sql = "Select * from (Select Producto.Nombre as nombreProducto,count(*) as cantidadInventario "
-                    + "from (Item inner join Producto on "
-                    + "Producto.nombre=Item.nombre_Producto)"
-                    + "WHERE Item.Estado ='En Bodega' GROUP BY Producto.nombre) where cantidadInventario>" + rango1
-                    + " AND cantidadInventario<" + rango2;
-            Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
+                while (rs.next()) {
 
-            while (rs.next()) {
+                    String nomProd = rs.getString("nombreProducto");
 
-                String nomProd = rs.getString("nombreProducto");
+                    sql = "Select * from ITEM where nombre_producto='" + nomProd + "' AND ESTADO='En Bodega'";
 
-                sql = "Select * from ITEM where nombre_producto='" + nomProd + "' AND ESTADO='En Bodega'";
+                    Statement st2 = con.createStatement();
+                    ResultSet rs2 = st2.executeQuery(sql);
 
+                    while (rs2.next()) {
+                        JSONObject jObject = new JSONObject();
+                        jObject.put("Id", rs2.getInt("id"));
+                        jObject.put("Estado", rs2.getString("ESTADO"));
+                        jObject.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
+                        jObject.put("Etapa", rs2.getInt("ETAPA"));
+                        jObject.put("IdPedido", rs2.getInt("ID_PEDIDO"));
+                        jArray.add(jObject);
+                    }
+
+                    st2.close();
+                }
+                st.close();
+            } else if (criterio.equalsIgnoreCase("Etapa")) {
+
+                int num_etapa = (int) jP.get("Etapa");
+
+                String sql = "select * from Item where etapa=" + num_etapa;
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
 
                 while (rs2.next()) {
+
                     JSONObject jObject = new JSONObject();
                     jObject.put("Id", rs2.getInt("id"));
                     jObject.put("Estado", rs2.getString("ESTADO"));
@@ -424,105 +473,88 @@ public class Prodandes {
                 }
 
                 st2.close();
-            }
-            st.close();
-        } else if (criterio.equalsIgnoreCase("Etapa")) {
 
-            int num_etapa = (int) jP.get("Etapa");
+            } else if (criterio.equalsIgnoreCase("Fecha solicitud")) {
 
-            String sql = "select * from Item where etapa=" + num_etapa;
-            Statement st2 = con.createStatement();
-            ResultSet rs2 = st2.executeQuery(sql);
+                DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                java.util.Date date = format.parse(jP.get("fecha_solicitud").toString().substring(0, 10));
+                System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
+                Calendar cEsp = new GregorianCalendar();
+                cEsp.setTime(date);
 
-            while (rs2.next()) {
+                String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                        + "-" + cEsp.get(GregorianCalendar.YEAR);
 
-                JSONObject jObject = new JSONObject();
-                jObject.put("Id", rs2.getInt("id"));
-                jObject.put("Estado", rs2.getString("ESTADO"));
-                jObject.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
-                jObject.put("Etapa", rs2.getInt("ETAPA"));
-                jObject.put("IdPedido", rs2.getInt("ID_PEDIDO"));
-                jArray.add(jObject);
-            }
+                System.out.println("Fecha " + fechaS);
+                String sql = "select * from PEDIDO_PRODUCTO where fecha_solicitud = "
+                        + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql);
 
-            st2.close();
+                while (rs.next()) {
 
-        } else if (criterio.equalsIgnoreCase("Fecha solicitud")) {
+                    int id_pedido = rs.getInt("id");
+                    sql = "select * from ITEM where ID_PEDIDO =" + id_pedido;
+                    Statement st2 = con.createStatement();
+                    ResultSet rs2 = st2.executeQuery(sql);
 
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            java.util.Date date = format.parse(jP.get("fecha_solicitud").toString().substring(0, 10));
-            System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
-            Calendar cEsp = new GregorianCalendar();
-            cEsp.setTime(date);
-
-            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
-                    + "-" + cEsp.get(GregorianCalendar.YEAR);
-
-            System.out.println("Fecha " + fechaS);
-            String sql = "select * from PEDIDO_PRODUCTO where fecha_solicitud = "
-                    + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
-            Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-
-                int id_pedido = rs.getInt("id");
-                sql = "select * from ITEM where ID_PEDIDO =" + id_pedido;
-                Statement st2 = con.createStatement();
-                ResultSet rs2 = st2.executeQuery(sql);
-
-                while (rs2.next()) {
-                    JSONObject jO = new JSONObject();
-                    jO.put("Id", rs2.getInt("id"));
-                    jO.put("Estado", rs2.getString("ESTADO"));
-                    jO.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
-                    jO.put("Etapa", rs2.getInt("ETAPA"));
-                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
-                    jArray.add(jO);
+                    while (rs2.next()) {
+                        JSONObject jO = new JSONObject();
+                        jO.put("Id", rs2.getInt("id"));
+                        jO.put("Estado", rs2.getString("ESTADO"));
+                        jO.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
+                        jO.put("Etapa", rs2.getInt("ETAPA"));
+                        jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
+                        jArray.add(jO);
+                    }
+                    st2.close();
                 }
-                st2.close();
-            }
 
-            st.close();
-        } else if (criterio.equalsIgnoreCase("Fecha entrega")) {
+                st.close();
+            } else if (criterio.equalsIgnoreCase("Fecha entrega")) {
 
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            java.util.Date date = format.parse(jP.get("fecha_entrega").toString().substring(0, 10));
-            System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
-            Calendar cEsp = new GregorianCalendar();
-            cEsp.setTime(date);
+                DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                java.util.Date date = format.parse(jP.get("fecha_entrega").toString().substring(0, 10));
+                System.out.println(date); // Sat Jan 02 00:00:00 GMT 2010
+                Calendar cEsp = new GregorianCalendar();
+                cEsp.setTime(date);
 
-            String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
-                    + "-" + cEsp.get(GregorianCalendar.YEAR);
+                String fechaS = cEsp.get(GregorianCalendar.DAY_OF_MONTH) + "-" + (cEsp.get(GregorianCalendar.MONTH) + 1)
+                        + "-" + cEsp.get(GregorianCalendar.YEAR);
 
-            String sql = "select * from PEDIDO_PRODUCTO where fecha_entrega = "
-                    + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
-            Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
+                String sql = "select * from PEDIDO_PRODUCTO where fecha_entrega = "
+                        + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql);
 
-            while (rs.next()) {
+                while (rs.next()) {
 
-                int id_pedido = rs.getInt("id");
-                sql = "select * from ITEM where ID_PEDIDO =" + id_pedido;
-                Statement st2 = con.createStatement();
-                ResultSet rs2 = st2.executeQuery(sql);
+                    int id_pedido = rs.getInt("id");
+                    sql = "select * from ITEM where ID_PEDIDO =" + id_pedido;
+                    Statement st2 = con.createStatement();
+                    ResultSet rs2 = st2.executeQuery(sql);
 
-                while (rs2.next()) {
-                    JSONObject jO = new JSONObject();
-                    jO.put("Id", rs2.getInt("id"));
-                    jO.put("Estado", rs2.getString("ESTADO"));
-                    jO.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
-                    jO.put("Etapa", rs2.getInt("ETAPA"));
-                    jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
-                    jArray.add(jO);
+                    while (rs2.next()) {
+                        JSONObject jO = new JSONObject();
+                        jO.put("Id", rs2.getInt("id"));
+                        jO.put("Estado", rs2.getString("ESTADO"));
+                        jO.put("Nombre", rs2.getString("NOMBRE_PRODUCTO"));
+                        jO.put("Etapa", rs2.getInt("ETAPA"));
+                        jO.put("IdPedido", rs2.getInt("ID_PEDIDO"));
+                        jArray.add(jO);
+                    }
+                    st2.close();
                 }
-                st2.close();
-            }
 
-            st.close();
+                st.close();
+            }
+            cerrarConexion();
+            return jArray;
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            return null;
         }
-        cerrarConexion();
-        return jArray;
     }
 
     @POST
@@ -833,29 +865,32 @@ public class Prodandes {
     // Metodos Adicionales
     // -------------------------------------------------
     public void crearItemsReservadosPedido(String nombreProducto, int id_pedido, int cantidad) throws Exception {
+        try {
+            for (int i = 0; i < cantidad; i++) {
+                String sql = "select max (id) as MAXIMO from ITEM";
+                Statement st = con.createStatement();
+                ResultSet rs = st.executeQuery(sql);
+                int id_item = -1;
+                if (rs.next()) {
+                    id_item = rs.getInt("MAXIMO") + 1;
 
-        for (int i = 0; i < cantidad; i++) {
-            String sql = "select max (id) as MAXIMO from ITEM";
-            Statement st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            int id_item = -1;
-            if (rs.next()) {
-                id_item = rs.getInt("MAXIMO") + 1;
+                    //Crear pedido nuevo
+                    sql = "INSERT INTO ITEM (id,ESTADO,NOMBRE_PRODUCTO,ID_PEDIDO)"
+                            + " VALUES (" + id_item + ",'Pre Produccion','" + nombreProducto + "',"
+                            + id_pedido + ")";
 
-                //Crear pedido nuevo
-                sql = "INSERT INTO ITEM (id,ESTADO,NOMBRE_PRODUCTO,ID_PEDIDO)"
-                        + " VALUES (" + id_item + ",'Pre Produccion','" + nombreProducto + "',"
-                        + id_pedido + ")";
+                    Statement st2 = con.createStatement();
 
-                Statement st2 = con.createStatement();
+                    st2.executeUpdate(sql);
 
-                st2.executeUpdate(sql);
-
-                st2.close();
+                    st2.close();
+                }
+                st.close();
             }
-            st.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
         }
-
     }
 
     @POST
@@ -955,7 +990,7 @@ public class Prodandes {
      * @throws Exception
      */
     public int reservarProductoBodega(String nombreProducto, int cantidad, int id_pedido) throws Exception {
-
+        try{
         System.out.println("Reservar Productos Bodega " + nombreProducto + "," + cantidad + "," + id_pedido);
         String query = "select * from ITEM where NOMBRE_PRODUCTO='" + nombreProducto + "' and ESTADO='En Bodega'";
 
@@ -978,11 +1013,16 @@ public class Prodandes {
 
         st.close();
         return i;
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            return 0;
+        }
     }
 
     public int reservarComponenteBodega(String id_componente, int cantidad_unidades, int id_pedido)
             throws Exception {
-
+        try{
         System.out.println("reservarComponenteBodega " + cantidad_unidades);
         String query = "select * from COMPONENTE_ITEM where componente='" + id_componente
                 + "' and ESTADO='En Bodega'";
@@ -1003,12 +1043,16 @@ public class Prodandes {
 
         st.close();
         return i;
-
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     public int reservarMateriaPrimaBodega(String id_materia, int cantidad_unidades, int id_pedido)
             throws Exception {
-
+        try{
         System.out.println("reservarComponenteBodega " + cantidad_unidades);
 
         String query = "select * from MATERIA_PRIMA_ITEM where materia='" + id_materia
@@ -1032,6 +1076,11 @@ public class Prodandes {
 
         st.close();
         return i;
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     //-------------------------------------------------------
@@ -1042,6 +1091,7 @@ public class Prodandes {
     public void reservarProductoREST(List lista) throws Exception {
 
         abrirConexion();
+
         LinkedHashMap lNombreProducto = (LinkedHashMap) lista.get(0);
         LinkedHashMap lCantidad = (LinkedHashMap) lista.get(1);
         LinkedHashMap lIdPedido = (LinkedHashMap) lista.get(2);
@@ -1056,6 +1106,11 @@ public class Prodandes {
     @Path("/registrarProveedor")
     public void registrarProveedor(JSONObject proveedor) throws Exception {
         abrirConexion();
+        try{
+        String lock = "lock table " + "proveedor" + " in exclusive mode";
+        Statement stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
         System.out.println("- - - - - - - - - - - - - - - - - Print Entrada - - - - - - - - - - - - - - - - -");
         System.out.println(proveedor);
         int doc = Integer.parseInt(proveedor.get("documento").toString());
@@ -1083,12 +1138,27 @@ public class Prodandes {
         st2.executeUpdate(sql);
         st2.close();
         cerrarConexion();
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     @POST
     @Path("/registrarLlegadaDeMaterial")
     public void registrarLlegadaDeMaterial(JSONObject idPedidoMateriaPrimaP) throws Exception {
         abrirConexion();
+        try{
+        String lock = "lock table " + "PEDIDO_MATERIA_PRIMA" + " in exclusive mode";
+        Statement stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
+
+        lock = "lock table " + "MATERIA_PRIMA_ITEM" + " in exclusive mode";
+        stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
         int idPedidoMateriaPrima = Integer.parseInt(idPedidoMateriaPrimaP.get("id").toString());
         System.out.println("Entrada parÃ¡metro registrarLlegadaDeMaterial");
         System.out.println(idPedidoMateriaPrima);
@@ -1108,12 +1178,26 @@ public class Prodandes {
         st.executeQuery(query);
         st.close();
         cerrarConexion();
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     @POST
     @Path("/registrarLlegadaDeComponentes")
     public void registrarLlegadaDeComponentes(JSONObject idPedidoComponenteP) throws Exception {
         abrirConexion();
+        try{
+        String lock = "lock table " + "PEDIDO_COMPONENTE" + " in exclusive mode";
+        Statement stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
+        lock = "lock table " + "COMPONENTE_ITEM" + " in exclusive mode";
+        stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
         int idPedidoComponente = Integer.parseInt(idPedidoComponenteP.get("id").toString());
         System.out.println("Entrada parÃ¡metro registrarLlegadaDeMaterial");
         System.out.println("Marca 1");
@@ -1136,12 +1220,34 @@ public class Prodandes {
         st.executeQuery(query);
         st.close();
         cerrarConexion();
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     @POST
     @Path("/registrarEjecucionEtapa")
     public JSONObject registrarEjecucionEtapa(JSONObject num_secuenciaP) throws Exception {
         abrirConexion();
+        try{
+        String lock = "lock table " + "item" + " in exclusive mode";
+        Statement stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
+        lock = "lock table " + "MATERIA_PRIMA_ITEM" + " in exclusive mode";
+        stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
+        lock = "lock table " + "ITEM_COMPONENTE_ETAPA" + " in exclusive mode";
+        stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
+        lock = "lock table " + "COMPONENTE_ITEM" + " in exclusive mode";
+        stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
         int num_secuencia = Integer.parseInt(num_secuenciaP.get("secuencia").toString());
         //Verificar productos
         System.out.println("Entrada parÃ¡metro registrarEjecucionEtapa");
@@ -1248,11 +1354,17 @@ public class Prodandes {
         JSONObject jRespuesta = new JSONObject();
         jRespuesta.put("Respuesta", "Operacion correcta");
         return jRespuesta;
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     @POST
     @Path("/verificarProductosEstacionAnterior")
     public int verificarProductosEstacionAnterior(int numSecuencia) throws Exception {
+        try{
         //Dar etapa y producto del num_secuencia
 //        String query3 = "select etapa, nombre_producto from ETAPA_DE_PRODUCCION where NUMERO_SECUENCIA = " + numSecuencia;
 //        System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
@@ -1303,6 +1415,11 @@ public class Prodandes {
         //FIN
         System.out.println("Return verificarProductosEstacionAnterior: " + resp6);
         return resp6;
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     // Comparar rangos
@@ -1311,6 +1428,7 @@ public class Prodandes {
     public JSONObject consultarEtapaProduccionMayorMovimiento(JSONObject jO) throws Exception {
 
         abrirConexion();
+        try{
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         java.util.Date dateIni = format.parse(jO.get("fechaInicio").toString());
         java.util.Date dateFin = format.parse(jO.get("fechaFin").toString());
@@ -1345,6 +1463,11 @@ public class Prodandes {
         cerrarConexion();
 
         return resp;
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     // Operario mas activo
@@ -1353,6 +1476,7 @@ public class Prodandes {
     public JSONObject operarioMasActivo(JSONObject jO) throws Exception {
 
         abrirConexion();
+        try{
         int num_secuencia = Integer.parseInt(jO.get("secuencia").toString());
 
         String query5 = "select * from OPERARIO natural join ("
@@ -1409,6 +1533,11 @@ public class Prodandes {
         resp.put("operarios", lista.toString());
         System.out.println("Respuesta: " + resp.toString());
         return resp;
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     //---------------------------------------------------------------------------------------------------------------
@@ -1417,10 +1546,10 @@ public class Prodandes {
     @POST
     @Path("/consultarPedidos")
     public JSONArray consultarPedidos(JSONObject jP) throws Exception {
-
+        
         JSONArray jArray = new JSONArray();
         abrirConexion();
-
+        try{
         String criterio = jP.get("Criterio").toString();
         if (criterio.equalsIgnoreCase("Cantidad")) {
 
@@ -1430,6 +1559,7 @@ public class Prodandes {
             String sql = "select * from PEDIDO_PRODUCTO where CANTIDAD_PRODUCTO >=" + rango1 + " AND CANTIDAD_PRODUCTO <= " + rango2;
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1451,6 +1581,7 @@ public class Prodandes {
             String sql = "select * from PEDIDO_PRODUCTO where ESTADO = '" + estado + "'";
             Statement st2 = con.createStatement();
             ResultSet rs = st2.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1482,6 +1613,7 @@ public class Prodandes {
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1513,6 +1645,7 @@ public class Prodandes {
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1544,6 +1677,7 @@ public class Prodandes {
                     + "TO_DATE('" + fechaS + "','dd-mm-yyyy')";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1566,6 +1700,7 @@ public class Prodandes {
             String sql = "select * from PEDIDO_PRODUCTO where ID_CLIENTE = " + id_cliente;
             Statement st2 = con.createStatement();
             ResultSet rs = st2.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1584,7 +1719,11 @@ public class Prodandes {
         }
         cerrarConexion();
         return jArray;
-
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     @POST
@@ -1593,7 +1732,6 @@ public class Prodandes {
 
         JSONArray jArray = new JSONArray();
         abrirConexion();
-
         String criterio = jP.get("Criterio").toString();
         System.out.println("Criterio: " + criterio);
         if (criterio.equalsIgnoreCase("Documento Id")) {
@@ -1603,6 +1741,7 @@ public class Prodandes {
             String sql = "select * from PROVEEDOR where DOCUMENTO_ID = '" + documentoId + "'";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1626,6 +1765,7 @@ public class Prodandes {
             String sql = "select * from PROVEEDOR where NOMBRE LIKE '%" + nombre + "%'";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1649,6 +1789,7 @@ public class Prodandes {
             String sql = "select * from PROVEEDOR where CIUDAD LIKE '%" + ciudad + "%'";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1675,6 +1816,7 @@ public class Prodandes {
             System.out.println(sql);
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1698,6 +1840,7 @@ public class Prodandes {
             String sql = "select * from PROVEEDOR where TELEFONO LIKE '%" + telefono + "%'";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1721,6 +1864,7 @@ public class Prodandes {
             String sql = "select * from PROVEEDOR where volumen_maximo = " + volMax;
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1744,6 +1888,7 @@ public class Prodandes {
             String sql = "select * from PROVEEDOR where tiempo_de_entrega = " + tiempoEntrega;
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1767,6 +1912,8 @@ public class Prodandes {
             String sql = "select * from PROVEEDOR where representante_legal = " + representanteLegal;
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            
+            escribirEnLog(sql);
 
             while (rs.next()) {
 
@@ -1790,19 +1937,28 @@ public class Prodandes {
 
     }
 
-         // desactivarEstacion
+    // desactivarEstacion
     @POST
     @Path("/desactivarEstacion")
     public JSONObject desactivarEstacion(JSONObject jO) throws Exception {
 
         abrirConexion();
-
+        try{
+        String lock = "lock table " + "ESTACION" + " in exclusive mode";
+        Statement stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
+        lock = "lock table " + "ETAPA_ESTACION" + " in exclusive mode";
+        stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
         // Contar activos st2
         String query2 = "select count(*) as cuenta from estacion where ESTADO='activo'";
         System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
         System.out.println(query2);
         Statement st2 = con.createStatement();
         ResultSet rs2 = st2.executeQuery(query2);
+        escribirEnLog(query2);
         int num_est_activas = 0;
         while (rs2.next()) {
             num_est_activas = rs2.getInt("CUENTA");
@@ -1816,6 +1972,7 @@ public class Prodandes {
         System.out.println(query3);
         Statement st3 = con.createStatement();
         ResultSet rs3 = st3.executeQuery(query3);
+        escribirEnLog(query3);
         int num_etapas = 0;
         while (rs3.next()) {
             num_etapas = rs3.getInt("CUENTA");
@@ -1839,6 +1996,7 @@ public class Prodandes {
         System.out.println("Estaciones actualizadas");
         Statement st1 = con.createStatement();
         st1.executeUpdate(query1);
+        escribirEnLog(query1);
         st1.close();
 
         // Borrar relaciones etapa_estacion st4
@@ -1847,6 +2005,7 @@ public class Prodandes {
         System.out.println(query4);
         Statement st4 = con.createStatement();
         st4.executeUpdate(query4);
+        escribirEnLog(query4);
         st4.close();
 
         // Seleccionar etapas st5
@@ -1854,6 +2013,7 @@ public class Prodandes {
         System.out.println(query5);
         Statement st5 = con.createStatement();
         ResultSet rs5 = st5.executeQuery(query5);
+        escribirEnLog(query5);
         int etapas[] = new int[num_etapas];
         int temp = 0;
         int i = 0;
@@ -1870,8 +2030,10 @@ public class Prodandes {
         // Seleccionar estaciones st6
         String query6 = ("select * from estacion where ESTADO = 'activo'");
         System.out.println(query6);
+            escribirEnLog(query6);
         Statement st6 = con.createStatement();
         ResultSet rs6 = st6.executeQuery(query6);
+        escribirEnLog(query6);
         int estaciones[] = new int[num_est_activas - 1];
         temp = 0;
         i = 0;
@@ -1901,6 +2063,7 @@ public class Prodandes {
             System.out.println(query7);
             st7 = con.createStatement();
             st7.executeUpdate(query7);
+            escribirEnLog(query7);
             i_estacion++;
         }
 
@@ -1909,6 +2072,11 @@ public class Prodandes {
         JSONObject jRespuestaOk = new JSONObject();
         jRespuestaOk.put("Respuesta", "Proceso correcto");
         return jRespuestaOk;
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     // activarEstacion
@@ -1917,13 +2085,22 @@ public class Prodandes {
     public JSONObject activarEstacion(JSONObject jO) throws Exception {
 
         abrirConexion();
-
+        try{
+        String lock = "lock table " + "ESTACION" + " in exclusive mode";
+        Statement stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
+        lock = "lock table " + "ETAPA_ESTACION" + " in exclusive mode";
+        stmt1 = con.createStatement();
+        stmt1.execute(lock);
+        stmt1.close();
         // Contar activos st2
         String query2 = "select count(*) as cuenta from estacion where ESTADO='activo'";
         System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
         System.out.println(query2);
         Statement st2 = con.createStatement();
         ResultSet rs2 = st2.executeQuery(query2);
+        escribirEnLog(query2);
         int num_est_activas = 0;
         while (rs2.next()) {
             num_est_activas = rs2.getInt("CUENTA");
@@ -1937,6 +2114,7 @@ public class Prodandes {
         System.out.println(query3);
         Statement st3 = con.createStatement();
         ResultSet rs3 = st3.executeQuery(query3);
+        escribirEnLog(query3);
         int num_etapas = 0;
         while (rs3.next()) {
             num_etapas = rs3.getInt("CUENTA");
@@ -1962,6 +2140,7 @@ public class Prodandes {
         System.out.println("Estaciones actualizadas");
         Statement st1 = con.createStatement();
         st1.executeUpdate(query1);
+        escribirEnLog(query1);
         st1.close();
 
         // Borrar relaciones etapa_estacion st4
@@ -1970,6 +2149,7 @@ public class Prodandes {
         System.out.println(query4);
         Statement st4 = con.createStatement();
         st4.executeUpdate(query4);
+        escribirEnLog(query4);
         st4.close();
 
         // Seleccionar etapas st5
@@ -1977,6 +2157,7 @@ public class Prodandes {
         System.out.println(query5);
         Statement st5 = con.createStatement();
         ResultSet rs5 = st5.executeQuery(query5);
+        escribirEnLog(query5);
         int etapas[] = new int[num_etapas];
         int temp = 0;
         int i = 0;
@@ -1995,6 +2176,7 @@ public class Prodandes {
         System.out.println(query6);
         Statement st6 = con.createStatement();
         ResultSet rs6 = st6.executeQuery(query6);
+        escribirEnLog(query6);
         int estaciones[] = new int[num_est_activas + 1];
         temp = 0;
         i = 0;
@@ -2024,6 +2206,7 @@ public class Prodandes {
             System.out.println(query7);
             st7 = con.createStatement();
             st7.executeUpdate(query7);
+            escribirEnLog(query7);
             i_estacion++;
         }
 
@@ -2032,6 +2215,11 @@ public class Prodandes {
         JSONObject jRespuestaOk = new JSONObject();
         jRespuestaOk.put("Respuesta", "Proceso correcto");
         return jRespuestaOk;
+        } catch (Exception e) {
+            e.printStackTrace();
+            rollback();
+            throw new Exception("");
+        }
     }
 
     @POST
@@ -2044,98 +2232,101 @@ public class Prodandes {
             String sql = "select * from PEDIDO_PRODUCTO where ID = " + idPedido;
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
+            escribirEnLog(sql);
             if (rs.next()) {
-                
+
                 jO.put("id", rs.getInt("id"));
                 jO.put("estado", rs.getString("estado"));
                 jO.put("cantidad_producto", rs.getInt("cantidad_producto"));
                 jO.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
                 jO.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
                 jO.put("fecha_entrega", rs.getDate("fecha_entrega"));
-                
-                
-                sql = "select CLIENTE.NOMBRE,CLIENTE.NUMERO_REGISTRO,CLIENTE.CIUDAD,CLIENTE.DIRECCION" +
-                      ",CLIENTE.REPRESENTANTE_LEGAL,CLIENTE.TELEFONO from PEDIDO_PRODUCTO inner join "
+
+                sql = "select CLIENTE.NOMBRE,CLIENTE.NUMERO_REGISTRO,CLIENTE.CIUDAD,CLIENTE.DIRECCION"
+                        + ",CLIENTE.REPRESENTANTE_LEGAL,CLIENTE.TELEFONO from PEDIDO_PRODUCTO inner join "
                         + "CLIENTE on PEDIDO_PRODUCTO.ID_CLIENTE=CLIENTE.NUMERO_REGISTRO WHERE "
-                        + "PEDIDO_PRODUCTO.ID="+idPedido;
+                        + "PEDIDO_PRODUCTO.ID=" + idPedido;
                 System.out.println("-----------------------------------------------------------------");
-                System.out.println("Ver Pedido - Cliente");                
+                System.out.println("Ver Pedido - Cliente");
                 System.out.println(sql);
                 System.out.println("-----------------------------------------------------------------");
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
-                
+                escribirEnLog(sql);
                 // Cliente
                 JSONObject jCliente = new JSONObject();
-                if( rs2.next()){
-                    
+                if (rs2.next()) {
+
                     jCliente.put("numero_registro", rs2.getInt("numero_registro"));
                     jCliente.put("nombre", rs2.getString("nombre"));
                     jCliente.put("ciudad", rs2.getString("ciudad"));
                     jCliente.put("direccion", rs2.getString("direccion"));
                     jCliente.put("telefono", rs2.getString("telefono"));
                     jCliente.put("representante_legal", rs2.getInt("representante_legal"));
-                    
-                }                
+
+                }
                 jO.put("cliente", jCliente);
                 st2.close();
                 // Items
-                sql ="select * from ITEM inner join PRODUCTO on ITEM.NOMBRE_PRODUCTO=PRODUCTO.NOMBRE "
-                        + "where ID_PEDIDO="+idPedido;
+                sql = "select * from ITEM inner join PRODUCTO on ITEM.NOMBRE_PRODUCTO=PRODUCTO.NOMBRE "
+                        + "where ID_PEDIDO=" + idPedido;
                 st2 = con.createStatement();
                 rs2 = st2.executeQuery(sql);
                 
+                escribirEnLog(sql);
                 JSONArray jItems = new JSONArray();
-                while( rs2.next()){
-                    
-                    JSONObject jItem = new JSONObject();                    
+                while (rs2.next()) {
+
+                    JSONObject jItem = new JSONObject();
                     jItem.put("id", rs2.getInt("id"));
                     jItem.put("nombre_producto", rs2.getString("nombre_producto"));
                     jItem.put("estado", rs2.getString("estado"));
                     jItem.put("etapa", rs2.getInt("etapa"));
                     jItem.put("costo_de_venta", rs2.getInt("costo_de_venta"));
                     jItems.add(jItem);
-                }                
+                }
                 jO.put("productos", jItems);
                 st2.close();
                 //Materias Primas
-                sql="select (items*cantidad_unidades)as cantidad,id_materia_prima from "
+                sql = "select (items*cantidad_unidades)as cantidad,id_materia_prima from "
                         + "(select ITEM.NOMBRE_PRODUCTO as id_producto, count(*) as items "
-                        + "from ITEM where ID_PEDIDO="+idPedido+" group by NOMBRE_PRODUCTO)" +
-                            " natural inner join MATERIAS_PRIMAS_PRODUCTO";
+                        + "from ITEM where ID_PEDIDO=" + idPedido + " group by NOMBRE_PRODUCTO)"
+                        + " natural inner join MATERIAS_PRIMAS_PRODUCTO";
                 st2 = con.createStatement();
                 rs2 = st2.executeQuery(sql);
                 
+                escribirEnLog(sql);
                 JSONArray jMateriasPrimas = new JSONArray();
-                while( rs2.next()){
-                    
-                    JSONObject jMateriaPrima = new JSONObject(); 
+                while (rs2.next()) {
+
+                    JSONObject jMateriaPrima = new JSONObject();
                     jMateriaPrima.put("materia", rs2.getString("id_materia_prima"));
                     jMateriaPrima.put("cantidad", rs2.getInt("cantidad"));
                     jMateriasPrimas.add(jMateriaPrima);
-                }                
+                }
                 jO.put("materias_primas", jMateriasPrimas);
                 st2.close();
-                
+
                 //Componentes
-                sql="select * from COMPONENTE_ITEM where ID_PEDIDO_PRODUCTO="+idPedido;
+                sql = "select * from COMPONENTE_ITEM where ID_PEDIDO_PRODUCTO=" + idPedido;
                 st2 = con.createStatement();
                 rs2 = st2.executeQuery(sql);
                 
+                escribirEnLog(sql);
+
                 JSONArray jComponentes = new JSONArray();
-                while( rs2.next()){
-                    
-                    JSONObject jComponente = new JSONObject();                    
+                while (rs2.next()) {
+
+                    JSONObject jComponente = new JSONObject();
                     jComponente.put("id", rs2.getInt("id"));
                     jComponente.put("componente", rs2.getString("componente"));
                     jComponente.put("unidades", rs2.getInt("unidades"));
                     jComponente.put("estado", rs2.getString("estado"));
                     jComponentes.add(jComponente);
-                }                
+                }
                 jO.put("componentes", jComponentes);
                 st2.close();
-                
-                
+
             }
 
             st.close();
@@ -2150,15 +2341,17 @@ public class Prodandes {
     @POST
     @Path("/verProveedor")
     public JSONObject verProveedor(JSONObject jP) throws Exception {
-        try{
+        try {
             String idProveedor = jP.get("id_proveedor").toString();
             abrirConexion();
             JSONObject jResp = new JSONObject();
-            
-            String sql = "select * from PROVEEDOR where DOCUMENTO_ID='"+idProveedor+"'";
+
+            String sql = "select * from PROVEEDOR where DOCUMENTO_ID='" + idProveedor + "'";
             Statement st = con.createStatement();
             ResultSet rs = st.executeQuery(sql);
-            if ( rs.next()){
+            
+            escribirEnLog(sql);
+            if (rs.next()) {
                 jResp.put("documento_id", rs.getString("documento_id"));
                 jResp.put("nombre", rs.getString("nombre"));
                 jResp.put("ciudad", rs.getString("ciudad"));
@@ -2167,15 +2360,15 @@ public class Prodandes {
                 jResp.put("volumen_maximo", rs.getInt("volumen_maximo"));
                 jResp.put("tiempo_de_entrega", rs.getInt("tiempo_de_entrega"));
                 jResp.put("representante_legal", rs.getInt("representante_legal"));
-                
+
                 //Materias Primas
-                
-                sql = "select * from MATERIA_PRIMA where PROOVEDOR_ID ='"+idProveedor+"'";
+                sql = "select * from MATERIA_PRIMA where PROOVEDOR_ID ='" + idProveedor + "'";
                 Statement st2 = con.createStatement();
                 ResultSet rs2 = st2.executeQuery(sql);
                 
+                escribirEnLog(sql);
                 JSONArray jMaterias = new JSONArray();
-                while (rs2.next()){
+                while (rs2.next()) {
                     JSONObject jMateria = new JSONObject();
                     jMateria.put("nombre", rs2.getString("nombre"));
                     jMateria.put("u_medida", rs2.getString("u_medida"));
@@ -2184,15 +2377,15 @@ public class Prodandes {
                 }
                 jResp.put("materias_primas", jMaterias);
                 st2.close();
-                
+
                 //Componentes
-                
-                sql = "select * from COMPONENTE where PROOVEDOR_ID ='"+idProveedor+"'";
+                sql = "select * from COMPONENTE where PROOVEDOR_ID ='" + idProveedor + "'";
                 st2 = con.createStatement();
                 rs2 = st2.executeQuery(sql);
                 
+                escribirEnLog(sql);
                 JSONArray jComponentes = new JSONArray();
-                while (rs2.next()){
+                while (rs2.next()) {
                     JSONObject jComponente = new JSONObject();
                     jComponente.put("nombre", rs2.getString("nombre"));
                     jComponente.put("tipo", rs2.getString("tipo"));
@@ -2200,17 +2393,17 @@ public class Prodandes {
                 }
                 jResp.put("componentes", jComponentes);
                 st2.close();
-                
+
                 // Productos
-                
-                sql ="select * from MATERIAS_PRIMAS_PRODUCTO inner join MATERIA_PRIMA on "
+                sql = "select * from MATERIAS_PRIMAS_PRODUCTO inner join MATERIA_PRIMA on "
                         + "MATERIAS_PRIMAS_PRODUCTO.ID_MATERIA_PRIMA=MATERIA_PRIMA.NOMBRE where "
-                        + "MATERIA_PRIMA.PROOVEDOR_ID='"+idProveedor+"'";
+                        + "MATERIA_PRIMA.PROOVEDOR_ID='" + idProveedor + "'";
                 st2 = con.createStatement();
                 rs2 = st2.executeQuery(sql);
                 
+                escribirEnLog(sql);
                 JSONArray jProductos = new JSONArray();
-                while(rs2.next()){
+                while (rs2.next()) {
                     JSONObject jProducto = new JSONObject();
                     jProducto.put("id_producto", rs2.getString("id_producto"));
                     jProducto.put("cantidad_unidades", rs2.getInt("cantidad_unidades"));
@@ -2221,15 +2414,14 @@ public class Prodandes {
             }
             st.close();
             return jResp;
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             rollback();
             e.printStackTrace();
-            throw new Exception ("Error en la base de datos");
+            throw new Exception("Error en la base de datos");
         }
-        
+
     }
-    
+
     @POST
     @Path("/consultarClientes")
     public JSONArray consultarCliente(JSONObject jP) throws Exception {
@@ -2252,11 +2444,10 @@ public class Prodandes {
             int num = -1;
 
             while (rs.next()) {
-                
+
                 JSONObject jObject = new JSONObject();
                 num = rs.getInt("numero_registro");
-                if(num != num_act)
-                {
+                if (num != num_act) {
                     jObject.put("numero_registro", num);
                     jObject.put("nombre", rs.getString("nombre"));
                     jObject.put("ciudad", rs.getString("ciudad"));
@@ -2264,9 +2455,7 @@ public class Prodandes {
                     jObject.put("telefono", rs.getString("telefono"));
                     jObject.put("representante_legal", rs.getInt("representante_legal"));
                     num_act = num;
-                }
-                else
-                {
+                } else {
                     jObject.put("numero_registro", "");
                     jObject.put("nombre", "");
                     jObject.put("ciudad", "");
@@ -2274,12 +2463,12 @@ public class Prodandes {
                     jObject.put("telefono", "");
                     jObject.put("representante_legal", "");
                 }
-                    jObject.put("id", rs.getInt("id"));
-                    jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
-                    jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
-                    jObject.put("estado", rs.getString("estado"));
-                    jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
-                    jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jObject.put("id", rs.getInt("id"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("estado", rs.getString("estado"));
+                jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
                 jArray.add(jObject);
             }
             st.close();
@@ -2299,8 +2488,7 @@ public class Prodandes {
 
                 JSONObject jObject = new JSONObject();
                 num = rs.getInt("numero_registro");
-                if(num != num_act)
-                {
+                if (num != num_act) {
                     jObject.put("numero_registro", num);
                     jObject.put("nombre", rs.getString("nombre"));
                     jObject.put("ciudad", rs.getString("ciudad"));
@@ -2308,9 +2496,7 @@ public class Prodandes {
                     jObject.put("telefono", rs.getString("telefono"));
                     jObject.put("representante_legal", rs.getInt("representante_legal"));
                     num_act = num;
-                }
-                else
-                {
+                } else {
                     jObject.put("numero_registro", "");
                     jObject.put("nombre", "");
                     jObject.put("ciudad", "");
@@ -2318,12 +2504,12 @@ public class Prodandes {
                     jObject.put("telefono", "");
                     jObject.put("representante_legal", "");
                 }
-                    jObject.put("id", rs.getInt("id"));
-                    jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
-                    jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
-                    jObject.put("estado", rs.getString("estado"));
-                    jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
-                    jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
+                jObject.put("id", rs.getInt("id"));
+                jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
+                jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
+                jObject.put("estado", rs.getString("estado"));
+                jObject.put("cantidad_producto", rs.getInt("cantidad_producto"));
+                jObject.put("fecha_solicitud", rs.getDate("fecha_solicitud"));
                 jArray.add(jObject);
 
             }
@@ -2334,5 +2520,29 @@ public class Prodandes {
 
     }
     
-   
+    public void escribirEnLog(String instruccion)
+    {
+        try {
+ 
+			File file = new File("H:\\logs\\log.txt");
+ 
+			// if file doesnt exists, then create it
+			//if (!file.exists()) {
+			//	file.createNewFile();
+			//}
+                        FileOutputStream fos =  new FileOutputStream(file, true);
+                        PrintWriter out = new PrintWriter(fos);
+			//FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			//BufferedWriter bw = new BufferedWriter(fw);
+			out.println(instruccion);
+			out.close();
+ 
+			System.out.println("Done");
+ 
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+           
+    }
+    
 }

@@ -598,7 +598,6 @@ prodAndes.directive('registrarProveedorForm', function(){
              console.log('Que es esto '+JSON.stringify(proveedorParam));console.log('Form pedido '+JSON.stringify(self.proveedor));
              $http.post('http://localhost:8080/backend/Servicios/registrarProveedor'
                  , self.proveedor).success(function(data){
-                     alert("Respuesta "+data.Respuesta);
                      self.proveedor={};
                  });
              };
