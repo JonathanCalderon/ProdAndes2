@@ -2236,12 +2236,12 @@ public class Prodandes {
 
         JSONArray jArray = new JSONArray();
         abrirConexion();
-
-        String criterio = jP.get("criterio").toString();
+        System.out.println(jP);
+        String criterio = jP.get("Criterio").toString();
         System.out.println("Criterio: " + criterio);
         if (criterio.equalsIgnoreCase("Nombre")) {
 
-            String nombre = jP.get("nombre").toString();
+            String nombre = jP.get("Nombre").toString();
 
             String sql = "select * from CLIENTE inner join PEDIDO_PRODUCTO on CLIENTE.NUMERO_REGISTRO = PEDIDO_PRODUCTO.ID_CLIENTE where NOMBRE LIKE '%" + nombre + "%'";
             System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
@@ -2274,7 +2274,7 @@ public class Prodandes {
                     jObject.put("telefono", "");
                     jObject.put("representante_legal", "");
                 }
-                    jObject.put("ID", rs.getDate("ID"));
+                    jObject.put("id", rs.getInt("id"));
                     jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
                     jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
                     jObject.put("estado", rs.getString("estado"));
@@ -2285,7 +2285,7 @@ public class Prodandes {
             st.close();
         } else {
 
-            String ciudad = jP.get("ciudad").toString();
+            String ciudad = jP.get("Ciudad").toString();
 
             String sql = "select * from CLIENTE inner join PEDIDO_PRODUCTO on CLIENTE.NUMERO_REGISTRO = PEDIDO_PRODUCTO.ID_CLIENTE where CIUDAD LIKE '%" + ciudad + "%'";
             System.out.println("- - - - - - - - - - - - - - - - - Print Query - - - - - - - - - - - - - - - - -");
@@ -2318,7 +2318,7 @@ public class Prodandes {
                     jObject.put("telefono", "");
                     jObject.put("representante_legal", "");
                 }
-                    jObject.put("ID", rs.getDate("ID"));
+                    jObject.put("id", rs.getInt("id"));
                     jObject.put("fecha_esperada_entrega", rs.getDate("fecha_esperada_entrega"));
                     jObject.put("fecha_entrega", rs.getDate("fecha_entrega"));
                     jObject.put("estado", rs.getString("estado"));

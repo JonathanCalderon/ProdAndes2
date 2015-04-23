@@ -272,7 +272,7 @@ prodAndes.directive('toolbarConsultaSuministros', function(){
                     console.log('Form consulta '+JSON.stringify(self.consulta));
                     $http.post('http://localhost:8080/backend/Servicios/consultarClientes' , self.consulta).success(function(data){
 
-                        console.log("Consultar clietes "+JSON.stringify(data));
+                        console.log("Consultar clientes "+JSON.stringify(data));
                         self.clientes=data;
                         console.log("Consultar clientes 2"+JSON.stringify(self.clientes));
                         self.consulta={};
@@ -448,6 +448,17 @@ prodAndes.directive('listaProductosConsulta', function(){
 
         },
         controllerAs:'listaProductosConsulta'
+    };
+});
+
+prodAndes.directive('listaClientesConsulta', function(){
+    return{
+        restrict:'E',
+        templateUrl: 'partials/lista-clientes-consulta.html',
+        controller:function(){
+
+        },
+        controllerAs:'listaClientesConsulta'
     };
 });
 
